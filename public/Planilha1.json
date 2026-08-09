@@ -1,0 +1,74 @@
+[
+  {
+    "3": 8,
+    "Spot": "Contrato",
+    "Material Urgente": "Material Normal",
+    "Amanda Salvi": "Michel Bernardes",
+    "ADMINISTRATIVE": "CAPEX"
+  },
+  {
+    "3": 5,
+    "Material Urgente": "Serviço Urgente",
+    "Amanda Salvi": "Leandro Abreu",
+    "ADMINISTRATIVE": "COMMUNICATION"
+  },
+  {
+    "3": 15,
+    "Material Urgente": "Serviço Normal",
+    "Amanda Salvi": "Júlia Guidorizzi",
+    "ADMINISTRATIVE": "COMMUNITY RELATIONS"
+  },
+  {
+    "3": 30,
+    "Material Urgente": "Regularização",
+    "ADMINISTRATIVE": "CPTR"
+  },
+  {
+    "3": 30,
+    "Material Urgente": "Contrato Contínuo Simples",
+    "ADMINISTRATIVE": "EXECUTIVE MANAGEMENT"
+  },
+  {
+    "3": 60,
+    "Material Urgente": "Contrato Contínuo Complexo",
+    "ADMINISTRATIVE": "FINANCE"
+  },
+  {
+    "3": 20,
+    "Material Urgente": "Importação",
+    "ADMINISTRATIVE": "GEOLOGICAL EXPLORATION"
+  },
+  {
+    "ADMINISTRATIVE": "HSE"
+  },
+  {
+    "ADMINISTRATIVE": "HUMAN RESOURCES"
+  },
+  {
+    "ADMINISTRATIVE": "LEGAL"
+  },
+  {
+    "ADMINISTRATIVE": "MINE PLANNING"
+  },
+  {
+    "ADMINISTRATIVE": "PROJECTS"
+  },
+  {
+    "ADMINISTRATIVE": "PURCHASING"
+  },
+  {
+    "ADMINISTRATIVE": "REGULATORY"
+  },
+  {
+    "ADMINISTRATIVE": "SUSTAINABILITY"
+  },
+  {
+    "ADMINISTRATIVE": "IT"
+  },
+  {
+    "ADMINISTRATIVE": "ENVIRONMENT"
+  },
+  {
+    "ADMINISTRATIVE": "MKT"
+  }
+]

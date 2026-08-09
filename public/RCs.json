@@ -1,0 +1,162 @@
+[
+  {
+    "Ano": 2026,
+    "Mês": "Janeiro",
+    "Nº Mês": 1,
+    "Indicador": "RC Recebidas",
+    "Categoria": "OPEX",
+    "Quantidade": 79
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Janeiro",
+    "Nº Mês": 1,
+    "Indicador": "RC Recebidas",
+    "Categoria": "CAPEX",
+    "Quantidade": 56
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Janeiro",
+    "Nº Mês": 1,
+    "Indicador": "RC Urgentes",
+    "Categoria": "OPEX",
+    "Quantidade": 33
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Janeiro",
+    "Nº Mês": 1,
+    "Indicador": "RC Urgentes",
+    "Categoria": "CAPEX",
+    "Quantidade": 45
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Fevereiro",
+    "Nº Mês": 2,
+    "Indicador": "RC Recebidas",
+    "Categoria": "OPEX",
+    "Quantidade": 70
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Fevereiro",
+    "Nº Mês": 2,
+    "Indicador": "RC Recebidas",
+    "Categoria": "CAPEX",
+    "Quantidade": 48
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Fevereiro",
+    "Nº Mês": 2,
+    "Indicador": "RC Urgentes",
+    "Categoria": "OPEX",
+    "Quantidade": 30
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Fevereiro",
+    "Nº Mês": 2,
+    "Indicador": "RC Urgentes",
+    "Categoria": "CAPEX",
+    "Quantidade": 36
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Março",
+    "Nº Mês": 3,
+    "Indicador": "RC Recebidas",
+    "Categoria": "OPEX",
+    "Quantidade": 109
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Março",
+    "Nº Mês": 3,
+    "Indicador": "RC Recebidas",
+    "Categoria": "CAPEX",
+    "Quantidade": 76
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Março",
+    "Nº Mês": 3,
+    "Indicador": "RC Urgentes",
+    "Categoria": "OPEX",
+    "Quantidade": 57
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Março",
+    "Nº Mês": 3,
+    "Indicador": "RC Urgentes",
+    "Categoria": "CAPEX",
+    "Quantidade": 59
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Abril",
+    "Nº Mês": 4,
+    "Indicador": "RC Recebidas",
+    "Categoria": "OPEX",
+    "Quantidade": 115
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Abril",
+    "Nº Mês": 4,
+    "Indicador": "RC Recebidas",
+    "Categoria": "CAPEX",
+    "Quantidade": 75
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Abril",
+    "Nº Mês": 4,
+    "Indicador": "RC Urgentes",
+    "Categoria": "OPEX",
+    "Quantidade": 56
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Abril",
+    "Nº Mês": 4,
+    "Indicador": "RC Urgentes",
+    "Categoria": "CAPEX",
+    "Quantidade": 53
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Maio",
+    "Nº Mês": 5,
+    "Indicador": "RC Recebidas",
+    "Categoria": "OPEX",
+    "Quantidade": 147
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Maio",
+    "Nº Mês": 5,
+    "Indicador": "RC Recebidas",
+    "Categoria": "CAPEX",
+    "Quantidade": 37
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Maio",
+    "Nº Mês": 5,
+    "Indicador": "RC Urgentes",
+    "Categoria": "OPEX",
+    "Quantidade": 83
+  },
+  {
+    "Ano": 2026,
+    "Mês": "Maio",
+    "Nº Mês": 5,
+    "Indicador": "RC Urgentes",
+    "Categoria": "CAPEX",
+    "Quantidade": 19
+  }
+]

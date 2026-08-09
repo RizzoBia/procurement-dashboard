@@ -1,0 +1,30 @@
+[
+  {
+    "3": 8,
+    "Material Urgente": "Material Normal"
+  },
+  {
+    "3": 15,
+    "Material Urgente": "Serviço Normal"
+  },
+  {
+    "3": 5,
+    "Material Urgente": "Serviço Urgente"
+  },
+  {
+    "3": 30,
+    "Material Urgente": "Regularização"
+  },
+  {
+    "3": 30,
+    "Material Urgente": "Contrato Contínuo Simples"
+  },
+  {
+    "3": 60,
+    "Material Urgente": "Contrato Contínuo Complexo"
+  },
+  {
+    "3": 20,
+    "Material Urgente": "Importação"
+  }
+]

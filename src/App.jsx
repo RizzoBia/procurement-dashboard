@@ -9,7 +9,10 @@ import Financeiro from './pages/Financeiro';
 import Operacional from './pages/Operacional';
 import Analytics from './pages/Analytics';
 import AdminUpload from './pages/AdminUpload';
+import Login from './pages/Login';
+import ProtectedRoute from './components/ProtectedRoute';
 import { DataProvider } from './context/DataContext';
+import { AuthProvider } from './context/AuthContext';
 
 function App() {
   const [theme, setTheme] = useState('dark');
@@ -23,23 +26,29 @@ function App() {
   };
 
   return (
-    <DataProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout theme={theme} toggleTheme={toggleTheme} />}>
-            <Route index element={<Navigate to="/executive" replace />} />
-            <Route path="executive" element={<ExecutiveDashboard />} />
-            <Route path="sla" element={<GestaoSLA />} />
-            <Route path="saving" element={<Saving />} />
-            <Route path="performance" element={<Performance />} />
-            <Route path="financeiro" element={<Financeiro />} />
-            <Route path="operacional" element={<Operacional />} />
-            <Route path="analytics" element={<Analytics />} />
-            <Route path="admin-upload" element={<AdminUpload />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </DataProvider>
+    <AuthProvider>
+      <DataProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            
+            <Route path="/" element={<ProtectedRoute />}>
+              <Route element={<Layout theme={theme} toggleTheme={toggleTheme} />}>
+                <Route index element={<Navigate to="/executive" replace />} />
+                <Route path="executive" element={<ExecutiveDashboard />} />
+                <Route path="sla" element={<GestaoSLA />} />
+                <Route path="saving" element={<Saving />} />
+                <Route path="performance" element={<Performance />} />
+                <Route path="financeiro" element={<Financeiro />} />
+                <Route path="operacional" element={<Operacional />} />
+                <Route path="analytics" element={<Analytics />} />
+                <Route path="admin-upload" element={<AdminUpload />} />
+              </Route>
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </DataProvider>
+    </AuthProvider>
   );
 }
 

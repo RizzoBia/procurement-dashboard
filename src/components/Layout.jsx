@@ -13,8 +13,10 @@ import {
   Maximize,
   Minimize,
   Menu,
-  Database
+  Database,
+  LogOut
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Layout.css';
 
 const navItems = [
@@ -31,6 +33,7 @@ const navItems = [
 export default function Layout({ theme, toggleTheme }) {
   const [presentationMode, setPresentationMode] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(window.innerWidth <= 768);
+  const { logout } = useAuth();
 
   const togglePresentation = () => setPresentationMode(!presentationMode);
 
@@ -93,6 +96,9 @@ export default function Layout({ theme, toggleTheme }) {
             </button>
             <button className="icon-btn" onClick={togglePresentation} title="Modo Apresentação">
               {presentationMode ? <Minimize size={20} /> : <Maximize size={20} />}
+            </button>
+            <button className="icon-btn" onClick={logout} title="Sair" style={{ marginLeft: '8px', color: '#ef4444' }}>
+              <LogOut size={20} />
             </button>
           </div>
         </header>

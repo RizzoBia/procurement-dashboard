@@ -5,7 +5,7 @@ import { LogIn } from 'lucide-react';
 import './Login.css';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -18,10 +18,13 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const { error } = await login(email, password);
+      // O Supabase exige um formato de e-mail por padrão. 
+      // Adicionamos um domínio fictício escondido para permitir login só com o "nome"
+      const formattedEmail = `${username.trim().toLowerCase()}@procurement.local`;
+      const { error } = await login(formattedEmail, password);
       
       if (error) {
-        setError('E-mail ou senha incorretos.');
+        setError('Usuário ou senha incorretos.');
       } else {
         navigate('/executive');
       }
@@ -45,13 +48,13 @@ export default function Login() {
 
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="email">E-mail</label>
+            <label htmlFor="username">Usuário</label>
             <input
-              type="email"
-              id="email"
-              placeholder="seu.email@exemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              id="username"
+              placeholder="Ex: admin ou michel.bernardes"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>
@@ -71,7 +74,7 @@ export default function Login() {
           <button 
             type="submit" 
             className="login-button" 
-            disabled={isLoading || !email || !password}
+            disabled={isLoading || !username || !password}
           >
             {isLoading ? 'Entrando...' : (
               <>

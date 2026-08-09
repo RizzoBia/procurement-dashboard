@@ -73,10 +73,38 @@
   font-size: 1rem;
   outline: none;
   transition: border-color 0.2s ease;
+  width: 100%;
 }
 
 .form-group input:focus {
   border-color: var(--primary-color);
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  padding-right: 40px;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.toggle-password-btn:hover {
+  color: var(--text-primary);
 }
 
 .login-button {

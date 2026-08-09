@@ -30,7 +30,7 @@ const navItems = [
 
 export default function Layout({ theme, toggleTheme }) {
   const [presentationMode, setPresentationMode] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(window.innerWidth <= 768);
 
   const togglePresentation = () => setPresentationMode(!presentationMode);
 

@@ -331,3 +331,37 @@
   color: #94a3b8;
   margin-top: 8px;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .chart-card, .col-span-2 {
+    min-width: 100%;
+    flex: 1 1 100%;
+  }
+  
+  .kpi-row {
+    flex-wrap: wrap;
+  }
+  
+  .kpi-card-mini {
+    min-width: calc(50% - 6px);
+  }
+  
+  .header-titles .page-title {
+    font-size: 1.25rem;
+  }
+  
+  .dashboard-header-flex {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .header-filters {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .filter-group {
+    flex: 1;
+  }
+}

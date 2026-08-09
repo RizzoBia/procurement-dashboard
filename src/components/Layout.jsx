@@ -60,7 +60,7 @@ export default function Layout({ theme, toggleTheme }) {
         <div className="sidebar-header">
           <div className="logo-container" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             {isSidebarCollapsed ? (
-              <div className="logo-icon" style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>V</div>
+              <img src="/viridis-logo.png" alt="Viridis Logo" style={{ maxWidth: '40px', maxHeight: '40px', objectFit: 'contain' }} />
             ) : (
               <img src="/viridis-logo.png" alt="Viridis Procurement Logo" style={{ maxWidth: '100%', maxHeight: '45px', objectFit: 'contain' }} />
             )}

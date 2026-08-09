@@ -164,35 +164,44 @@
 
 /* Presentation Mode */
 .app-container.presentation-mode .sidebar {
-  width: 0;
-  transform: translateX(-100%);
-  border: none;
+  display: none;
 }
 
 .app-container.presentation-mode .top-header {
-  height: 0;
-  overflow: hidden;
-  border: none;
+  display: none;
 }
 
 .app-container.presentation-mode .content-scrollable {
   padding: 16px;
+  width: 100vw;
 }
 
 /* Float button for exiting presentation mode */
 .app-container.presentation-mode::before {
   content: 'Esc / Duplo clique para sair';
   position: fixed;
-  top: 10px;
-  right: 10px;
-  background: rgba(0,0,0,0.5);
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.7);
   color: white;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 12px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
   z-index: 9999;
-  opacity: 0.5;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  pointer-events: none;
+  animation: fadeOut 3s forwards;
+  animation-delay: 3s;
 }
+
+@keyframes fadeOut {
+  to {
+    opacity: 0.1;
+  }
+}
+
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {

@@ -53,7 +53,7 @@ export default function Login() {
             <input
               type="text"
               id="username"
-              placeholder="Ex: admin ou michel.bernardes"
+              placeholder="Digite seu usuário"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required

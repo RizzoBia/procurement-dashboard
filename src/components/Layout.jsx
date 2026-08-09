@@ -61,18 +61,7 @@ export default function Layout({ theme, toggleTheme }) {
         <div className="sidebar-header">
           <div className="logo-container" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
             {isSidebarCollapsed ? (
-              <div className="logo-icon" style={{ 
-                backgroundColor: 'linear-gradient(135deg, #a3e635 0%, #4ade80 100%)', 
-                background: '#4ade80',
-                color: '#020617', 
-                fontSize: '1.4rem', 
-                fontWeight: '900', 
-                fontFamily: '"Arial Black", Impact, sans-serif',
-                width: '36px',
-                height: '36px',
-                borderRadius: '6px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-              }}>V</div>
+              <img src="/viridis-logo.png" alt="Viridis Logo" style={{ width: '64px', height: 'auto', maxHeight: '40px', objectFit: 'contain' }} />
             ) : (
               <img src="/viridis-logo.png" alt="Viridis Procurement Logo" style={{ maxWidth: '100%', maxHeight: '45px', objectFit: 'contain' }} />
             )}

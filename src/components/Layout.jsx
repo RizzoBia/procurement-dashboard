@@ -14,7 +14,8 @@ import {
   Minimize,
   Menu,
   Database,
-  LogOut
+  LogOut,
+  X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Layout.css';
@@ -58,11 +59,20 @@ export default function Layout({ theme, toggleTheme }) {
       {/* Sidebar */}
       <aside className={`sidebar ${presentationMode ? 'hidden-print no-print' : ''} ${isSidebarCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
-          <div className="logo-container" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div className="logo-container" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
             {isSidebarCollapsed ? (
               <img src="/viridis-logo.png" alt="Viridis Logo" style={{ maxWidth: '40px', maxHeight: '40px', objectFit: 'contain' }} />
             ) : (
               <img src="/viridis-logo.png" alt="Viridis Procurement Logo" style={{ maxWidth: '100%', maxHeight: '45px', objectFit: 'contain' }} />
+            )}
+            {!isSidebarCollapsed && (
+              <button 
+                className="mobile-close-btn" 
+                onClick={() => setIsSidebarCollapsed(true)}
+                title="Fechar Menu"
+              >
+                <X size={20} />
+              </button>
             )}
           </div>
         </div>

@@ -151,13 +151,6 @@ export default function GestaoSLA() {
                     />
                   ))}
                 </Pie>
-                <RechartsTooltip 
-                  offset={40}
-                  cursor={{fill: 'rgba(255, 255, 255, 0.05)'}}
-                  contentStyle={{ backgroundColor: 'var(--panel-bg)', borderColor: 'var(--border-color)', borderRadius: '8px' }}
-                  labelStyle={{ color: 'var(--text-primary)', fontWeight: 'bold', marginBottom: '4px' }}
-                  itemStyle={{ color: 'var(--text-secondary)' }}
-                />
               </PieChart>
             </ResponsiveContainer>
             <div className="donut-center" style={{top: '45%'}}>

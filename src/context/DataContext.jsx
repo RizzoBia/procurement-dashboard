@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
+import initialData from '../data/procurementData.json';
 
 const DataContext = createContext();
 
@@ -8,25 +9,33 @@ export function useData() {
 }
 
 export function DataProvider({ children }) {
-  const [data, setData] = useState({ pcs: [] });
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState({
+    pcs: initialData.pcs || [],
+    fornecedores: initialData.fornecedores || [],
+    monthly_rcs: initialData.monthly_rcs || []
+  });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Filters state
+  // Global Filters for Procurement
   const [filters, setFilters] = useState({
     ano: 'Todos',
     mes: 'Todos',
+    periodoInicio: '',
+    periodoFim: '',
     comprador: 'Todos',
     area: 'Todos',
     statusSla: 'Todos',
   });
 
-  // Unique options for dropdowns
-  const [filterOptions, setFilterOptions] = useState({
-    anos: ['Todos'],
-    meses: ['Todos'],
-    compradores: ['Todos'],
-    areas: ['Todos']
+  // Filters specifically for Fornecedores
+  const [fornecedorFilters, setFornecedorFilters] = useState({
+    categoria: 'Todos',
+    uf: 'Todos',
+    cidade: 'Todos',
+    compraInternet: 'Todos',
+    fornecedorLocal: 'Todos',
+    busca: ''
   });
 
   const toTitleCase = (str) => {
@@ -42,52 +51,43 @@ export function DataProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
+      // Try fetching from Supabase
       const { data: pcsData, error: pcsError } = await supabase
         .from('controle_pcs')
         .select('*');
 
-      if (pcsError) throw pcsError;
+      if (pcsError) {
+        console.warn("Supabase load failed, using local bundled data:", pcsError.message);
+        // Fallback to bundled dataset
+        setData({
+          pcs: initialData.pcs || [],
+          fornecedores: initialData.fornecedores || [],
+          monthly_rcs: initialData.monthly_rcs || []
+        });
+      } else if (pcsData && pcsData.length > 0) {
+        const formattedData = pcsData.map(row => ({
+          ...row,
+          comprador: toTitleCase(row.comprador),
+          area_requisitante: toTitleCase(row.area_requisitante),
+          fornecedor: toTitleCase(row.fornecedor),
+          material_servico: toTitleCase(row.material_servico),
+          tipo: toTitleCase(row.tipo)
+        }));
 
-      const formattedData = (pcsData || []).map(row => ({
-        ...row,
-        comprador: toTitleCase(row.comprador),
-        area_requisitante: toTitleCase(row.area_requisitante),
-        fornecedor: toTitleCase(row.fornecedor),
-        material_servico: toTitleCase(row.material_servico),
-        tipo: toTitleCase(row.tipo)
-      }));
-
-      setData({ pcs: formattedData });
-
-      // Build unique filter options based on the loaded data
-      const compradores = new Set(['Todos']);
-      const areas = new Set(['Todos']);
-      const anos = new Set(['Todos']);
-      const meses = new Set(['Todos']);
-
-      formattedData.forEach(row => {
-        if (row.comprador) compradores.add(row.comprador);
-        if (row.area_requisitante) areas.add(row.area_requisitante);
-        
-        if (row.data_pedido) {
-          const date = new Date(row.data_pedido);
-          anos.add(date.getFullYear().toString());
-          // Month names in pt-BR
-          const monthName = date.toLocaleString('pt-BR', { month: 'long' });
-          meses.add(monthName.charAt(0).toUpperCase() + monthName.slice(1));
-        }
-      });
-
-      setFilterOptions({
-        anos: Array.from(anos).sort(),
-        meses: Array.from(meses), // Ideally sort by month index
-        compradores: Array.from(compradores).sort(),
-        areas: Array.from(areas).sort()
-      });
-
+        setData(prev => ({
+          ...prev,
+          pcs: formattedData,
+          fornecedores: initialData.fornecedores || [],
+          monthly_rcs: initialData.monthly_rcs || []
+        }));
+      }
     } catch (err) {
-      console.error("Error fetching data from Supabase:", err);
-      setError(err.message);
+      console.warn("Error loading data from Supabase, fallback to bundled data:", err);
+      setData({
+        pcs: initialData.pcs || [],
+        fornecedores: initialData.fornecedores || [],
+        monthly_rcs: initialData.monthly_rcs || []
+      });
     } finally {
       setLoading(false);
     }
@@ -101,8 +101,79 @@ export function DataProvider({ children }) {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  // Derive filtered data
-  const filteredData = React.useMemo(() => {
+  const resetFilters = () => {
+    setFilters({
+      ano: 'Todos',
+      mes: 'Todos',
+      periodoInicio: '',
+      periodoFim: '',
+      comprador: 'Todos',
+      area: 'Todos',
+      statusSla: 'Todos',
+    });
+  };
+
+  const updateFornecedorFilter = (key, value) => {
+    setFornecedorFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const resetFornecedorFilters = () => {
+    setFornecedorFilters({
+      categoria: 'Todos',
+      uf: 'Todos',
+      cidade: 'Todos',
+      compraInternet: 'Todos',
+      fornecedorLocal: 'Todos',
+      busca: ''
+    });
+  };
+
+  // Filter options derived from loaded data
+  const filterOptions = useMemo(() => {
+    const compradores = new Set(['Todos']);
+    const areas = new Set(['Todos']);
+    const anos = new Set(['Todos']);
+    const meses = new Set(['Todos']);
+
+    data.pcs.forEach(row => {
+      if (row.comprador) compradores.add(row.comprador);
+      if (row.area_requisitante) areas.add(row.area_requisitante);
+      
+      const dateStr = row.data_pedido || row.data_aprovacao_rc;
+      if (dateStr) {
+        const date = new Date(dateStr);
+        if (!isNaN(date.getTime())) {
+          anos.add(date.getFullYear().toString());
+          const monthName = date.toLocaleString('pt-BR', { month: 'long' });
+          meses.add(monthName.charAt(0).toUpperCase() + monthName.slice(1));
+        }
+      }
+    });
+
+    // Fornecedor filter options
+    const fornCategorias = new Set(['Todos']);
+    const fornUfs = new Set(['Todos']);
+    const fornCidades = new Set(['Todos']);
+
+    data.fornecedores.forEach(f => {
+      if (f.categoria) fornCategorias.add(f.categoria);
+      if (f.uf) fornUfs.add(f.uf);
+      if (f.cidade) fornCidades.add(f.cidade);
+    });
+
+    return {
+      anos: Array.from(anos).sort(),
+      meses: Array.from(meses),
+      compradores: Array.from(compradores).sort(),
+      areas: Array.from(areas).sort(),
+      fornCategorias: Array.from(fornCategorias).sort(),
+      fornUfs: Array.from(fornUfs).sort(),
+      fornCidades: Array.from(fornCidades).sort()
+    };
+  }, [data.pcs, data.fornecedores]);
+
+  // Derived filtered PCs
+  const filteredData = useMemo(() => {
     return data.pcs.filter(row => {
       let pass = true;
 
@@ -113,14 +184,29 @@ export function DataProvider({ children }) {
       if (filters.area !== 'Todos' && row.area_requisitante !== filters.area) pass = false;
 
       // Filter by Ano/Mês
-      if (row.data_pedido && (filters.ano !== 'Todos' || filters.mes !== 'Todos')) {
-        const date = new Date(row.data_pedido);
-        if (filters.ano !== 'Todos' && date.getFullYear().toString() !== filters.ano) pass = false;
-        
-        if (filters.mes !== 'Todos') {
-          const monthName = date.toLocaleString('pt-BR', { month: 'long' });
-          const formattedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-          if (formattedMonth !== filters.mes) pass = false;
+      const dateStr = row.data_pedido || row.data_aprovacao_rc;
+      if (dateStr) {
+        const date = new Date(dateStr);
+        if (!isNaN(date.getTime())) {
+          if (filters.ano !== 'Todos' && date.getFullYear().toString() !== filters.ano) pass = false;
+          
+          if (filters.mes !== 'Todos') {
+            const monthName = date.toLocaleString('pt-BR', { month: 'long' });
+            const formattedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+            if (formattedMonth !== filters.mes) pass = false;
+          }
+
+          // Date period range filter
+          if (filters.periodoInicio) {
+            const start = new Date(filters.periodoInicio);
+            if (date < start) pass = false;
+          }
+          if (filters.periodoFim) {
+            const end = new Date(filters.periodoFim);
+            // end of that day
+            end.setHours(23, 59, 59, 999);
+            if (date > end) pass = false;
+          }
         }
       }
 
@@ -135,12 +221,48 @@ export function DataProvider({ children }) {
     });
   }, [data.pcs, filters]);
 
+  // Derived filtered Fornecedores
+  const filteredFornecedores = useMemo(() => {
+    return data.fornecedores.filter(f => {
+      let pass = true;
+
+      if (fornecedorFilters.categoria !== 'Todos' && f.categoria !== fornecedorFilters.categoria) pass = false;
+      if (fornecedorFilters.uf !== 'Todos' && f.uf !== fornecedorFilters.uf) pass = false;
+      if (fornecedorFilters.cidade !== 'Todos' && f.cidade !== fornecedorFilters.cidade) pass = false;
+      if (fornecedorFilters.compraInternet !== 'Todos' && f.compra_internet !== fornecedorFilters.compraInternet) pass = false;
+      if (fornecedorFilters.fornecedorLocal !== 'Todos' && f.fornecedor_local !== fornecedorFilters.fornecedorLocal) pass = false;
+
+      if (fornecedorFilters.busca && fornecedorFilters.busca.trim() !== '') {
+        const q = fornecedorFilters.busca.toLowerCase();
+        const matchRazao = (f.razao_social || '').toLowerCase().includes(q);
+        const matchFantasia = (f.nome_fantasia || '').toLowerCase().includes(q);
+        const matchCnpj = (f.cnpj || '').toLowerCase().includes(q);
+        const matchCod = (f.codigo || '').toLowerCase().includes(q);
+        const matchContato = (f.contato || '').toLowerCase().includes(q);
+        const matchEmail = (f.email || '').toLowerCase().includes(q);
+        const matchCidade = (f.cidade || '').toLowerCase().includes(q);
+        if (!matchRazao && !matchFantasia && !matchCnpj && !matchCod && !matchContato && !matchEmail && !matchCidade) {
+          pass = false;
+        }
+      }
+
+      return pass;
+    });
+  }, [data.fornecedores, fornecedorFilters]);
+
   const value = {
     rawData: data,
     filteredData,
+    fornecedores: data.fornecedores,
+    filteredFornecedores,
+    monthlyRcs: data.monthly_rcs,
     filters,
     filterOptions,
     updateFilter,
+    resetFilters,
+    fornecedorFilters,
+    updateFornecedorFilter,
+    resetFornecedorFilters,
     loading,
     error,
     refreshData: fetchData

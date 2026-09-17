@@ -8,6 +8,7 @@ import {
   DollarSign, 
   Settings, 
   BarChart2,
+  Building2,
   Moon,
   Sun,
   Maximize,
@@ -23,6 +24,7 @@ import './Layout.css';
 const navItems = [
   { path: '/executive', label: 'Visão Geral', icon: <LayoutDashboard size={20} /> },
   { path: '/sla', label: 'Gestão de SLA', icon: <Clock size={20} /> },
+  { path: '/fornecedores', label: 'Fornecedores', icon: <Building2 size={20} /> },
   { path: '/saving', label: 'Saving', icon: <TrendingUp size={20} /> },
   { path: '/performance', label: 'Performance', icon: <Users size={20} /> },
   { path: '/financeiro', label: 'Financeiro', icon: <DollarSign size={20} /> },

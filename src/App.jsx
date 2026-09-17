@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import ExecutiveDashboard from './pages/ExecutiveDashboard';
 import GestaoSLA from './pages/GestaoSLA';
+import Fornecedores from './pages/Fornecedores';
 import Saving from './pages/Saving';
 import Performance from './pages/Performance';
 import Financeiro from './pages/Financeiro';
@@ -37,6 +38,7 @@ function App() {
                 <Route index element={<Navigate to="/executive" replace />} />
                 <Route path="executive" element={<ExecutiveDashboard />} />
                 <Route path="sla" element={<GestaoSLA />} />
+                <Route path="fornecedores" element={<Fornecedores />} />
                 <Route path="saving" element={<Saving />} />
                 <Route path="performance" element={<Performance />} />
                 <Route path="financeiro" element={<Financeiro />} />

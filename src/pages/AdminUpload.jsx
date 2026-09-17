@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
 import { supabase } from '../lib/supabase';
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle } from 'lucide-react';
+import { useData } from '../context/DataContext';
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import './AdminUpload.css';
 
 export default function AdminUpload() {
+  const { refreshData } = useData();
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [status, setStatus] = useState(null);
+  const [cleanSync, setCleanSync] = useState(true);
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -26,38 +29,56 @@ export default function AdminUpload() {
       const workbook = XLSX.read(data);
       
       let totalInserted = 0;
+      let totalFornecedores = 0;
 
       if (workbook.SheetNames.includes('Controle PCs')) {
         const pcsSheet = workbook.Sheets['Controle PCs'];
         const pcsData = XLSX.utils.sheet_to_json(pcsSheet);
         
-        const pcsPayload = pcsData.map(row => {
-          const pedido = row['Pedido Compras'] ? String(row['Pedido Compras']) : '';
-          const rc = row['RC'] ? String(row['RC']) : '';
-          const fornecedor = row['Fornecedor'] ? String(row['Fornecedor']) : '';
-          const proposta = row[' Proposta\r\n Negociada '] ? String(row[' Proposta\r\n Negociada ']) : '';
-          const uniqId = `${pedido}_${rc}_${fornecedor}_${proposta}`.replace(/\s+/g, '');
+        const pcsPayload = pcsData.map((row, idx) => {
+          const pedido = row['Pedido Compras'] ? String(row['Pedido Compras']).trim() : '';
+          const rc = row['RC'] ? String(row['RC']).trim() : '';
+          const fornecedor = row['Fornecedor'] ? String(row['Fornecedor']).trim() : '';
+          const propNeg = row[' Proposta\r\n Negociada '] || row['Proposta Negociada'] || row['Proposta\n Negociada'] || 0;
+          const propIni = row[' Proposta\r\n Inicial '] || row['Proposta Inicial'] || row['Proposta\n Inicial'] || 0;
+          const saving = row[' Saving + Cost \r\nTotal '] || row['Saving + Cost Total'] || row['Saving + Cost \nTotal'] || 0;
+          const uniqId = `${pedido}_${rc}_${fornecedor}_${propNeg}_${idx}`.replace(/\s+/g, '_');
+
+          const parseExcelDate = (val) => {
+            if (!val) return null;
+            if (typeof val === 'number') {
+              return new Date(Math.round((val - 25569) * 86400 * 1000)).toISOString();
+            }
+            const d = new Date(val);
+            return !isNaN(d.getTime()) ? d.toISOString() : null;
+          };
 
           return {
             id: uniqId,
             pedido_compras: pedido || null,
             rc: rc || null,
-          comprador: row['Comprador'],
-          area_requisitante: row['Área Requisitante'],
-          fornecedor: row['Fornecedor'],
-          tipo: row['Tipo'],
-          proposta_inicial: row[' Proposta\r\n Inicial '] || 0,
-          proposta_negociada: row[' Proposta\r\n Negociada '] || 0,
-          saving_cost_total: row[' Saving + Cost \r\nTotal '] || 0,
-          percentual_reducao: row['% Redução'] || 0,
-          sla_atendimento: row['SLA Atendimento'] || 0,
-          atrasada_no_prazo: row['Atrasada / No prazo'],
-          data_aprovacao_rc: row['Data Última Aprovação RC'] ? new Date(Math.round((row['Data Última Aprovação RC'] - 25569) * 86400 * 1000)).toISOString() : null,
-          data_pedido: row['Data\r\nPedido'] ? new Date(Math.round((row['Data\r\nPedido'] - 25569) * 86400 * 1000)).toISOString() : null
+            comprador: row['Comprador'] ? String(row['Comprador']).trim() : null,
+            area_requisitante: row['Área Requisitante'] ? String(row['Área Requisitante']).trim() : null,
+            fornecedor: fornecedor || null,
+            tipo: row['Tipo'] ? String(row['Tipo']).trim() : null,
+            material_servico: row['Material / Serviço'] ? String(row['Material / Serviço']).trim() : null,
+            proposta_inicial: typeof propIni === 'number' ? propIni : parseFloat(propIni) || 0,
+            proposta_negociada: typeof propNeg === 'number' ? propNeg : parseFloat(propNeg) || 0,
+            saving_cost_total: typeof saving === 'number' ? saving : parseFloat(saving) || 0,
+            percentual_reducao: row['% Redução'] || 0,
+            sla_atendimento: row['SLA Atendimento'] || 0,
+            atrasada_no_prazo: row['Atrasada / No prazo'] ? String(row['Atrasada / No prazo']).trim() : 'NO PRAZO',
+            data_aprovacao_rc: parseExcelDate(row['Data Última Aprovação RC']),
+            data_pedido: parseExcelDate(row['Data\r\nPedido'] || row['Data\nPedido'] || row['Data Pedido'])
           };
-        }).filter(row => row.id && row.pedido_compras);
+        }).filter(row => row.id && (row.pedido_compras || row.rc));
 
-        const batchSize = 1000;
+        if (cleanSync) {
+          // Purge existing table to prevent ghost/duplicate records
+          await supabase.from('controle_pcs').delete().neq('id', '___non_existent___');
+        }
+
+        const batchSize = 100;
         for (let i = 0; i < pcsPayload.length; i += batchSize) {
           const batch = pcsPayload.slice(i, i + batchSize);
           const { error } = await supabase.from('controle_pcs').upsert(batch, { onConflict: 'id' });
@@ -66,10 +87,17 @@ export default function AdminUpload() {
         }
       }
 
-      setStatus({ type: 'success', message: `Upload concluído! ${totalInserted} registros de Controle PCs processados.` });
+      if (refreshData) {
+        await refreshData();
+      }
+
+      setStatus({ 
+        type: 'success', 
+        message: `Upload concluído com sucesso! ${totalInserted} registros de Controle PCs sincronizados.` 
+      });
     } catch (err) {
       console.error(err);
-      setStatus({ type: 'error', message: `Erro ao processar: ${err.message}` });
+      setStatus({ type: 'error', message: `Erro ao processar planilha: ${err.message}` });
     } finally {
       setIsUploading(false);
     }
@@ -80,7 +108,7 @@ export default function AdminUpload() {
       <header className="dashboard-header-flex">
         <div className="header-titles">
           <h1 className="page-title">Administração do Sistema</h1>
-          <p className="page-subtitle">Atualização da base de dados</p>
+          <p className="page-subtitle">Sincronização e Atualização da Base de Dados</p>
         </div>
       </header>
 
@@ -88,7 +116,7 @@ export default function AdminUpload() {
         <div className="upload-header">
           <FileSpreadsheet size={32} className="upload-icon" />
           <h2>Upload de Planilha de Compras</h2>
-          <p>Selecione a planilha Excel mais recente contendo as abas "Controle PCs", etc.</p>
+          <p>Selecione a planilha Excel mais recente contendo as abas "Controle PCs", "Cadastro Fornecedores", etc.</p>
         </div>
 
         <div className="upload-area">
@@ -105,13 +133,32 @@ export default function AdminUpload() {
           </label>
         </div>
 
+        <div style={{ margin: '14px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+          <input 
+            type="checkbox" 
+            id="clean-sync" 
+            checked={cleanSync} 
+            onChange={e => setCleanSync(e.target.checked)} 
+          />
+          <label htmlFor="clean-sync" style={{ cursor: 'pointer', color: 'var(--text-primary)' }}>
+            <strong>Sincronização Limpa:</strong> substituir base anterior para evitar duplicidades e registros fantasmas (Recomendado).
+          </label>
+        </div>
+
         {file && (
           <button 
             className="btn-upload" 
             onClick={processAndUpload} 
             disabled={isUploading}
           >
-            {isUploading ? "Processando e Enviando..." : "Iniciar Upload"}
+            {isUploading ? (
+              <>
+                <RefreshCw size={18} className="animate-spin" />
+                <span>Processando e Sincronizando...</span>
+              </>
+            ) : (
+              "Iniciar Upload e Sincronização"
+            )}
           </button>
         )}
 

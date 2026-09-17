@@ -11,28 +11,24 @@ import {
 import { useData } from '../context/DataContext';
 import './Fornecedores.css';
 
-const DONUT_COLORS_LOCAL = ['#22c55e', '#64748b'];
-const DONUT_COLORS_NET = ['#22c55e', '#64748b'];
-
 export default function Fornecedores() {
   const { 
-    fornecedores, 
-    filteredFornecedores, 
-    fornecedorFilters, 
-    updateFornecedorFilter, 
-    resetFornecedorFilters,
-    filterOptions,
-    loading 
-  } = useData();
+    filteredFornecedores = [], 
+    fornecedorFilters = { categoria: 'Todos', uf: 'Todos', cidade: 'Todos', compraInternet: 'Todos', fornecedorLocal: 'Todos', busca: '' }, 
+    updateFornecedorFilter = () => {}, 
+    resetFornecedorFilters = () => {},
+    filterOptions = {},
+    loading = false
+  } = useData() || {};
 
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
+  const fornList = filteredFornecedores || [];
+
   // Derive metrics and chart data
   const metrics = useMemo(() => {
-    if (!filteredFornecedores) return null;
-
-    const total = filteredFornecedores.length;
+    const total = fornList.length;
     let locais = 0;
     let naoLocais = 0;
     let compraNet = 0;
@@ -45,7 +41,8 @@ export default function Fornecedores() {
     const uniqueUfs = new Set();
     const uniqueCidades = new Set();
 
-    filteredFornecedores.forEach(f => {
+    fornList.forEach(f => {
+      if (!f) return;
       if (f.categoria) {
         uniqueCats.add(f.categoria);
         catMap[f.categoria] = (catMap[f.categoria] || 0) + 1;
@@ -114,14 +111,15 @@ export default function Fornecedores() {
       donutLocal,
       donutNet
     };
-  }, [filteredFornecedores]);
+  }, [fornList]);
 
   // Paginated table data
-  const totalPages = Math.ceil((filteredFornecedores.length || 0) / pageSize) || 1;
+  const totalRecords = fornList.length;
+  const totalPages = Math.ceil(totalRecords / pageSize) || 1;
   const paginatedFornecedores = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
-    return filteredFornecedores.slice(start, start + pageSize);
-  }, [filteredFornecedores, currentPage]);
+    return fornList.slice(start, start + pageSize);
+  }, [fornList, currentPage]);
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -130,35 +128,35 @@ export default function Fornecedores() {
   };
 
   const hasActiveFilters = 
-    fornecedorFilters.categoria !== 'Todos' ||
-    fornecedorFilters.uf !== 'Todos' ||
-    fornecedorFilters.cidade !== 'Todos' ||
-    fornecedorFilters.compraInternet !== 'Todos' ||
-    fornecedorFilters.fornecedorLocal !== 'Todos' ||
-    Boolean(fornecedorFilters.busca);
+    (fornecedorFilters?.categoria && fornecedorFilters.categoria !== 'Todos') ||
+    (fornecedorFilters?.uf && fornecedorFilters.uf !== 'Todos') ||
+    (fornecedorFilters?.cidade && fornecedorFilters.cidade !== 'Todos') ||
+    (fornecedorFilters?.compraInternet && fornecedorFilters.compraInternet !== 'Todos') ||
+    (fornecedorFilters?.fornecedorLocal && fornecedorFilters.fornecedorLocal !== 'Todos') ||
+    Boolean(fornecedorFilters?.busca);
 
   if (loading) {
     return <div className="dashboard-container" style={{padding: 40}}><h2>Carregando fornecedores...</h2></div>;
   }
 
   const {
-    total,
-    ativos,
-    percAtivos,
-    totalCategorias,
-    locais,
-    percLocal,
-    naoLocais,
-    percNaoLocal,
-    compraNet,
-    percNet,
-    totalUfs,
-    totalCidades,
-    catData,
-    ufData,
-    cidadeData,
-    donutLocal,
-    donutNet
+    total = 0,
+    ativos = 0,
+    percAtivos = 100,
+    totalCategorias = 0,
+    locais = 0,
+    percLocal = 0,
+    naoLocais = 0,
+    percNaoLocal = 0,
+    compraNet = 0,
+    percNet = 0,
+    totalUfs = 0,
+    totalCidades = 0,
+    catData = [],
+    ufData = [],
+    cidadeData = [],
+    donutLocal = [],
+    donutNet = []
   } = metrics || {};
 
   return (
@@ -175,37 +173,37 @@ export default function Fornecedores() {
           <div className="filter-group">
             <label>Categoria</label>
             <select 
-              value={fornecedorFilters.categoria} 
+              value={fornecedorFilters?.categoria || 'Todos'} 
               onChange={e => { updateFornecedorFilter('categoria', e.target.value); setCurrentPage(1); }}
             >
-              {filterOptions.fornCategorias?.map(c => <option key={c} value={c}>{c}</option>)}
+              {(filterOptions?.fornCategorias || ['Todos']).map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
 
           <div className="filter-group">
             <label>Estado (UF)</label>
             <select 
-              value={fornecedorFilters.uf} 
+              value={fornecedorFilters?.uf || 'Todos'} 
               onChange={e => { updateFornecedorFilter('uf', e.target.value); setCurrentPage(1); }}
             >
-              {filterOptions.fornUfs?.map(u => <option key={u} value={u}>{u}</option>)}
+              {(filterOptions?.fornUfs || ['Todos']).map(u => <option key={u} value={u}>{u}</option>)}
             </select>
           </div>
 
           <div className="filter-group">
             <label>Cidade</label>
             <select 
-              value={fornecedorFilters.cidade} 
+              value={fornecedorFilters?.cidade || 'Todos'} 
               onChange={e => { updateFornecedorFilter('cidade', e.target.value); setCurrentPage(1); }}
             >
-              {filterOptions.fornCidades?.map(c => <option key={c} value={c}>{c}</option>)}
+              {(filterOptions?.fornCidades || ['Todos']).map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
 
           <div className="filter-group">
             <label>Compra pela Internet</label>
             <select 
-              value={fornecedorFilters.compraInternet} 
+              value={fornecedorFilters?.compraInternet || 'Todos'} 
               onChange={e => { updateFornecedorFilter('compraInternet', e.target.value); setCurrentPage(1); }}
             >
               <option value="Todos">Todos</option>
@@ -217,7 +215,7 @@ export default function Fornecedores() {
           <div className="filter-group">
             <label>Fornecedor Local</label>
             <select 
-              value={fornecedorFilters.fornecedorLocal} 
+              value={fornecedorFilters?.fornecedorLocal || 'Todos'} 
               onChange={e => { updateFornecedorFilter('fornecedorLocal', e.target.value); setCurrentPage(1); }}
             >
               <option value="Todos">Todos</option>
@@ -281,7 +279,7 @@ export default function Fornecedores() {
             <div className="forn-kpi-icon"><MapPin size={24} /></div>
             <div className="forn-kpi-val">{locais}</div>
           </div>
-          <div className="forn-kpi-badge">{percLocal.toFixed(1).replace('.', ',')}%</div>
+          <div className="forn-kpi-badge">{(percLocal || 0).toFixed(1).replace('.', ',')}%</div>
         </div>
 
         <div className="glass-panel forn-kpi-card">
@@ -290,7 +288,7 @@ export default function Fornecedores() {
             <div className="forn-kpi-icon"><Globe size={24} /></div>
             <div className="forn-kpi-val">{naoLocais}</div>
           </div>
-          <div className="forn-kpi-badge">{percNaoLocal.toFixed(1).replace('.', ',')}%</div>
+          <div className="forn-kpi-badge">{(percNaoLocal || 0).toFixed(1).replace('.', ',')}%</div>
         </div>
 
         <div className="glass-panel forn-kpi-card">
@@ -299,7 +297,7 @@ export default function Fornecedores() {
             <div className="forn-kpi-icon"><ShoppingCart size={24} /></div>
             <div className="forn-kpi-val">{compraNet}</div>
           </div>
-          <div className="forn-kpi-badge">{percNet.toFixed(1).replace('.', ',')}%</div>
+          <div className="forn-kpi-badge">{(percNet || 0).toFixed(1).replace('.', ',')}%</div>
         </div>
 
         <div className="glass-panel forn-kpi-card">
@@ -333,7 +331,7 @@ export default function Fornecedores() {
                   cursor={{fill: 'rgba(255, 255, 255, 0.05)'}}
                   contentStyle={{ backgroundColor: 'var(--panel-bg)', borderColor: 'var(--border-color)', borderRadius: '8px' }}
                   labelStyle={{ color: 'var(--text-primary)', fontWeight: 'bold' }}
-                  formatter={(val, name, item) => [`${val} fornecedores`, item.payload.fullName]}
+                  formatter={(val, name, item) => [`${val} fornecedores`, item?.payload?.fullName || name]}
                 />
                 <Bar dataKey="count" fill="#22c55e" barSize={12} radius={[0, 4, 4, 0]} />
               </BarChart>
@@ -349,10 +347,10 @@ export default function Fornecedores() {
               <div className="uf-dist-item" key={u.name}>
                 <div className="uf-info">
                   <span className="uf-code">{u.name}</span>
-                  <span className="uf-count">{u.count} ({u.perc.toFixed(1).replace('.', ',')}%)</span>
+                  <span className="uf-count">{u.count} ({(u.perc || 0).toFixed(1).replace('.', ',')}%)</span>
                 </div>
                 <div className="uf-bar-track">
-                  <div className="uf-bar-fill" style={{ width: `${u.perc}%`, backgroundColor: i === 0 ? '#22c55e' : i === 1 ? '#16a34a' : '#15803d' }}></div>
+                  <div className="uf-bar-fill" style={{ width: `${u.perc || 0}%`, backgroundColor: i === 0 ? '#22c55e' : i === 1 ? '#16a34a' : '#15803d' }}></div>
                 </div>
               </div>
             ))}
@@ -371,7 +369,7 @@ export default function Fornecedores() {
                   cursor={{fill: 'rgba(255, 255, 255, 0.05)'}}
                   contentStyle={{ backgroundColor: 'var(--panel-bg)', borderColor: 'var(--border-color)', borderRadius: '8px' }}
                   labelStyle={{ color: 'var(--text-primary)', fontWeight: 'bold' }}
-                  formatter={(val, name, item) => [`${val} fornecedores`, item.payload.fullName]}
+                  formatter={(val, name, item) => [`${val} fornecedores`, item?.payload?.fullName || name]}
                 />
                 <Bar dataKey="count" fill="#22c55e" barSize={12} radius={[0, 4, 4, 0]} />
               </BarChart>
@@ -393,10 +391,10 @@ export default function Fornecedores() {
               </ResponsiveContainer>
               <div className="donut-sub-legend">
                 <div className="sub-legend-item">
-                  <span className="dot green"></span> Local <strong>{locais} ({percLocal.toFixed(1)}%)</strong>
+                  <span className="dot green"></span> Local <strong>{locais} ({(percLocal || 0).toFixed(1)}%)</strong>
                 </div>
                 <div className="sub-legend-item">
-                  <span className="dot gray"></span> Não Local <strong>{naoLocais} ({percNaoLocal.toFixed(1)}%)</strong>
+                  <span className="dot gray"></span> Não Local <strong>{naoLocais} ({(percNaoLocal || 0).toFixed(1)}%)</strong>
                 </div>
               </div>
             </div>
@@ -414,10 +412,10 @@ export default function Fornecedores() {
               </ResponsiveContainer>
               <div className="donut-sub-legend">
                 <div className="sub-legend-item">
-                  <span className="dot green"></span> Sim <strong>{compraNet} ({percNet.toFixed(1)}%)</strong>
+                  <span className="dot green"></span> Sim <strong>{compraNet} ({(percNet || 0).toFixed(1)}%)</strong>
                 </div>
                 <div className="sub-legend-item">
-                  <span className="dot gray"></span> Não <strong>{total - compraNet} ({percNaoNet.toFixed(1)}%)</strong>
+                  <span className="dot gray"></span> Não <strong>{total - compraNet} ({(percNaoNet || 0).toFixed(1)}%)</strong>
                 </div>
               </div>
             </div>
@@ -434,10 +432,10 @@ export default function Fornecedores() {
             <input 
               type="text" 
               placeholder="Pesquisar fornecedor..." 
-              value={fornecedorFilters.busca}
+              value={fornecedorFilters?.busca || ''}
               onChange={e => { updateFornecedorFilter('busca', e.target.value); setCurrentPage(1); }}
             />
-            {fornecedorFilters.busca && (
+            {fornecedorFilters?.busca && (
               <button 
                 type="button" 
                 className="search-clear-btn" 
@@ -506,9 +504,9 @@ export default function Fornecedores() {
         {/* Pagination Controls */}
         <div className="forn-table-footer">
           <div className="forn-record-info">
-            {total > 0 ? (
+            {totalRecords > 0 ? (
               <>
-                {(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, total)} de {total} registros
+                {(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, totalRecords)} de {totalRecords} registros
               </>
             ) : (
               '0 registros'

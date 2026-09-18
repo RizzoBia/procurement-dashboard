@@ -32,18 +32,36 @@ export default function Financeiro() {
       spendTotal += propNeg;
       savingTotal += saving;
       
-      if (row.capex_opex && row.capex_opex.toUpperCase() === 'CAPEX') {
+      const area = (row.area_requisitante || '').toString().toUpperCase();
+      const tipo = (row.tipo || '').toString().toUpperCase();
+      const matServ = (row.material_servico || '').toString().toUpperCase();
+      const rc = (row.rc || '').toString().toUpperCase();
+      const capexOpex = (row.capex_opex || '').toString().toUpperCase();
+
+      const isCapex = 
+        capexOpex.includes('CAPEX') ||
+        area.includes('CAPEX') ||
+        tipo.includes('CAPEX') ||
+        matServ.includes('CAPEX') ||
+        rc.includes('CAPEX');
+
+      if (isCapex) {
         capexTotal += propNeg;
       } else {
-        opexTotal += propNeg; // Assuming anything else or OPEX goes here
+        opexTotal += propNeg;
       }
 
       // Mensal
       if (row.data_pedido) {
         const date = new Date(row.data_pedido);
         const monthYear = `${date.toLocaleString('pt-BR', { month: 'short' })}/${date.getFullYear().toString().slice(-2)}`;
-        if (!mensalMap[monthYear]) mensalMap[monthYear] = { name: monthYear, spend: 0, time: date.getTime() };
+        if (!mensalMap[monthYear]) mensalMap[monthYear] = { name: monthYear, spend: 0, capex: 0, opex: 0, time: date.getTime() };
         mensalMap[monthYear].spend += propNeg;
+        if (isCapex) {
+          mensalMap[monthYear].capex += propNeg;
+        } else {
+          mensalMap[monthYear].opex += propNeg;
+        }
       }
 
       // Pareto Fornecedores

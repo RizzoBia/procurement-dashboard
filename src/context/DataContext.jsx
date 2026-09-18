@@ -65,14 +65,20 @@ export function DataProvider({ children }) {
           monthly_rcs: initialData.monthly_rcs || []
         });
       } else if (pcsData && pcsData.length > 0) {
-        const formattedData = pcsData.map(row => ({
-          ...row,
-          comprador: toTitleCase(row.comprador),
-          area_requisitante: toTitleCase(row.area_requisitante),
-          fornecedor: toTitleCase(row.fornecedor),
-          material_servico: toTitleCase(row.material_servico),
-          tipo: toTitleCase(row.tipo)
-        }));
+        const formattedData = pcsData.map(row => {
+          const fallbackRow = initialData.pcs?.find(p => p.id === row.id || (p.pedido_compras && row.pedido_compras && p.pedido_compras === row.pedido_compras));
+          const capexOpex = row.capex_opex || fallbackRow?.capex_opex || (row.area_requisitante && row.area_requisitante.toUpperCase().includes('CAPEX') ? 'CAPEX' : 'OPEX');
+
+          return {
+            ...row,
+            comprador: toTitleCase(row.comprador),
+            area_requisitante: toTitleCase(row.area_requisitante),
+            fornecedor: toTitleCase(row.fornecedor),
+            material_servico: toTitleCase(row.material_servico),
+            tipo: toTitleCase(row.tipo),
+            capex_opex: capexOpex
+          };
+        });
 
         setData(prev => ({
           ...prev,

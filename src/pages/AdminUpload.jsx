@@ -53,6 +53,9 @@ export default function AdminUpload() {
             return !isNaN(d.getTime()) ? d.toISOString() : null;
           };
 
+          const capexRaw = row['CAPEX / OPEX'] || row['CAPEX/OPEX'] || row['Capex / Opex'] || row['Capex/Opex'] || row['Natureza'] || row['Capex'] || '';
+          const capexVal = String(capexRaw).trim().toUpperCase().includes('CAPEX') ? 'CAPEX' : 'OPEX';
+
           return {
             id: uniqId,
             pedido_compras: pedido || null,
@@ -62,6 +65,7 @@ export default function AdminUpload() {
             fornecedor: fornecedor || null,
             tipo: row['Tipo'] ? String(row['Tipo']).trim() : null,
             material_servico: row['Material / Serviço'] ? String(row['Material / Serviço']).trim() : null,
+            capex_opex: capexVal,
             proposta_inicial: typeof propIni === 'number' ? propIni : parseFloat(propIni) || 0,
             proposta_negociada: typeof propNeg === 'number' ? propNeg : parseFloat(propNeg) || 0,
             saving_cost_total: typeof saving === 'number' ? saving : parseFloat(saving) || 0,
@@ -81,8 +85,14 @@ export default function AdminUpload() {
         const batchSize = 100;
         for (let i = 0; i < pcsPayload.length; i += batchSize) {
           const batch = pcsPayload.slice(i, i + batchSize);
-          const { error } = await supabase.from('controle_pcs').upsert(batch, { onConflict: 'id' });
-          if (error) throw error;
+          let { error } = await supabase.from('controle_pcs').upsert(batch, { onConflict: 'id' });
+          if (error && error.message && error.message.includes('capex_opex')) {
+            const strippedBatch = batch.map(({ capex_opex, ...rest }) => rest);
+            const retryRes = await supabase.from('controle_pcs').upsert(strippedBatch, { onConflict: 'id' });
+            if (retryRes.error) throw retryRes.error;
+          } else if (error) {
+            throw error;
+          }
           totalInserted += batch.length;
         }
       }

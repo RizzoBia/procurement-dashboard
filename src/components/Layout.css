@@ -235,3 +235,61 @@
     justify-content: center;
   }
 }
+
+/* =========================================
+   PRINT / PDF EXPORT STYLES
+   ========================================= */
+@media print {
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background-color: #0b0f19 !important;
+    color: #f3f4f6 !important;
+  }
+
+  .sidebar,
+  .top-header,
+  .no-print,
+  .chart-header-btn,
+  .mobile-close-btn {
+    display: none !important;
+  }
+
+  .app-container {
+    display: block !important;
+    height: auto !important;
+    background: transparent !important;
+  }
+
+  .main-content {
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .content-scrollable {
+    overflow: visible !important;
+    padding: 0 !important;
+    height: auto !important;
+  }
+
+  .chart-card,
+  .glass-panel,
+  .kpi-card-mini,
+  .procurement-alerts-container {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    box-shadow: none !important;
+  }
+
+  .dashboard-container {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+}
+

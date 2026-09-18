@@ -3,11 +3,12 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   LineChart, Line, ComposedChart
 } from 'recharts';
-import { DollarSign, PiggyBank, Percent, ShoppingCart, Clock, Target, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
+import { DollarSign, PiggyBank, Percent, ShoppingCart, Clock, Target, AlertTriangle, TrendingUp, TrendingDown, Download, Printer } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import GlobalFilters from '../components/GlobalFilters';
 import ProcurementAlerts from '../components/ProcurementAlerts';
 import ChartHeader from '../components/ChartHeader';
+import { exportToExcel } from '../utils/exportUtils';
 import './ExecutiveDashboard.css';
 
 // Helper formatter
@@ -46,57 +47,32 @@ export default function ExecutiveDashboard() {
       spendTotal += propNeg;
       savingTotal += saving;
       propostaInicialTotal += propIni;
-      
-      if (row.pedido_compras && row.pedido_compras !== '') {
-        uniquePedidos.add(row.pedido_compras);
-      }
+
+      if (row.pedido_compras) uniquePedidos.add(row.pedido_compras);
+      else if (row.numero_pedido) uniquePedidos.add(row.numero_pedido);
+
+      // SLA
       if (row.sla_atendimento) slaAtendimentoSum += row.sla_atendimento;
-      
-      const status = row.atrasada_no_prazo ? row.atrasada_no_prazo.toUpperCase() : '';
-      if (status.includes('NO PRAZO')) {
-        slaNoPrazoCount++;
-      } else if (status.includes('ATRASADA')) {
-        pedidosEmAtrasoCount++;
-      }
-
-      // Evolução mensal de Spend e Saving
-      if (row.data_pedido) {
-        const date = new Date(row.data_pedido);
-        const monthYear = `${date.toLocaleString('pt-BR', { month: 'short' })}/${date.getFullYear().toString().slice(-2)}`;
-        if (!mensalMap[monthYear]) mensalMap[monthYear] = { name: monthYear, spend: 0, saving: 0, propIni: 0, time: date.getTime() };
-        mensalMap[monthYear].spend += propNeg;
-        mensalMap[monthYear].saving += saving;
-        mensalMap[monthYear].propIni += propIni;
-      }
-
-      // Evolução mensal de RCs Recebidas (data aprovação) x Concluídas (data pedido)
-      if (row.data_aprovacao_rc) {
-        const date = new Date(row.data_aprovacao_rc);
-        const my = `${date.toLocaleString('pt-BR', { month: 'short' })}/${date.getFullYear().toString().slice(-2)}`;
-        if (!rcsMensalMap[my]) rcsMensalMap[my] = { name: my, recebidas: 0, concluidas: 0, time: date.getTime() };
-        rcsMensalMap[my].recebidas += 1;
-      }
-      if (row.data_pedido) {
-        const date = new Date(row.data_pedido);
-        const my = `${date.toLocaleString('pt-BR', { month: 'short' })}/${date.getFullYear().toString().slice(-2)}`;
-        if (!rcsMensalMap[my]) rcsMensalMap[my] = { name: my, recebidas: 0, concluidas: 0, time: date.getTime() };
-        rcsMensalMap[my].concluidas += 1;
-      }
-
-      // Agrupamentos
-      if (row.comprador) {
-        compradorMap[row.comprador] = (compradorMap[row.comprador] || 0) + saving;
-      }
-      if (row.area_requisitante) {
-        areaMap[row.area_requisitante] = (areaMap[row.area_requisitante] || 0) + propNeg;
-      }
-      if (row.status_sla === 'No Prazo') slaNoPrazoCount++;
-      if (row.status_sla === 'Em Atraso') pedidosEmAtrasoCount++;
+      const status = row.atrasada_no_prazo ? row.atrasada_no_prazo.toUpperCase() : (row.status_sla || '').toUpperCase();
+      if (status.includes('NO PRAZO')) slaNoPrazoCount++;
+      else if (status.includes('ATRASADA') || status.includes('EM ATRASO')) pedidosEmAtrasoCount++;
 
       // Agrupamento Mensal Spend e Saving
-      const mesKey = row.ano_mes || 'Outros';
+      let mesKey = row.ano_mes;
+      let timestamp = 0;
+      if (row.data_pedido) {
+        const d = new Date(row.data_pedido);
+        mesKey = `${d.toLocaleString('pt-BR', { month: 'short' })}/${d.getFullYear().toString().slice(-2)}`;
+        timestamp = d.getTime();
+      } else if (row.data_aprovacao_rc) {
+        const d = new Date(row.data_aprovacao_rc);
+        mesKey = `${d.toLocaleString('pt-BR', { month: 'short' })}/${d.getFullYear().toString().slice(-2)}`;
+        timestamp = d.getTime();
+      }
+      mesKey = mesKey || 'Outros';
+
       if (!mensalMap[mesKey]) {
-        mensalMap[mesKey] = { mesKey, spend: 0, saving: 0, propIni: 0, time: row.data_rc ? new Date(row.data_rc).getTime() : 0 };
+        mensalMap[mesKey] = { mesKey, spend: 0, saving: 0, propIni: 0, time: timestamp };
       }
       mensalMap[mesKey].spend += propNeg;
       mensalMap[mesKey].saving += saving;
@@ -108,11 +84,11 @@ export default function ExecutiveDashboard() {
           name: mesKey, 
           recebidas: 0, 
           concluidas: 0, 
-          time: row.data_rc ? new Date(row.data_rc).getTime() : 0 
+          time: timestamp 
         };
       }
-      if (row.numero_rc) rcsMensalMap[mesKey].recebidas++;
-      if (row.numero_pedido || row.status_sla === 'No Prazo') rcsMensalMap[mesKey].concluidas++;
+      if (row.rc || row.numero_rc) rcsMensalMap[mesKey].recebidas++;
+      if (row.pedido_compras || row.numero_pedido || status.includes('NO PRAZO')) rcsMensalMap[mesKey].concluidas++;
 
       // Comprador
       const comp = row.comprador || 'Não informado';
@@ -127,14 +103,14 @@ export default function ExecutiveDashboard() {
       fornecedorMap[forn] = (fornecedorMap[forn] || 0) + propNeg;
 
       // Processos (para tabela Top 10)
-      const rcKey = row.numero_rc || row.numero_pedido || `Item-${Math.random()}`;
+      const rcKey = row.rc || row.numero_rc || row.pedido_compras || row.numero_pedido || `Item-${Math.random()}`;
       if (!processosMap.has(rcKey)) {
         processosMap.set(rcKey, {
-          rc: row.numero_rc || '-',
-          pedido: row.numero_pedido || '-',
+          rc: row.rc || row.numero_rc || '-',
+          pedido: row.pedido_compras || row.numero_pedido || '-',
           fornecedor: row.fornecedor || '-',
           area: row.area_requisitante || '-',
-          categoria: row.categoria || '-',
+          categoria: row.material_servico || row.categoria || '-',
           pInicial: 0,
           pNegociada: 0,
           savingRs: 0,
@@ -169,6 +145,8 @@ export default function ExecutiveDashboard() {
       }
     }
 
+    const totalPedidosDisplay = uniquePedidos.size > 0 ? uniquePedidos.size.toLocaleString('pt-BR') : filteredData.length.toLocaleString('pt-BR');
+
     const kpis = [
       {
         title: 'SPEND TOTAL',
@@ -192,7 +170,7 @@ export default function ExecutiveDashboard() {
       },
       {
         title: 'TOTAL PEDIDOS',
-        value: uniquePedidos.size.toLocaleString('pt-BR'),
+        value: totalPedidosDisplay,
         icon: <ShoppingCart size={22} />,
         iconColor: '#f43f5e'
       },
@@ -276,7 +254,29 @@ export default function ExecutiveDashboard() {
     <div className="dashboard-container">
       <header className="dashboard-header-flex">
         <div className="header-titles">
-          <h1 className="page-title">VISÃO GERAL PROCUREMENT</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <h1 className="page-title">VISÃO GERAL PROCUREMENT</h1>
+            <button 
+              onClick={() => window.print()}
+              className="no-print"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px',
+                color: 'var(--text-secondary)',
+                fontSize: '12px',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              title="Imprimir tela ou salvar em PDF"
+            >
+              <Printer size={14} /> PDF / Imprimir
+            </button>
+          </div>
           <p className="page-subtitle">Visão executiva de Compras</p>
         </div>
         <GlobalFilters />

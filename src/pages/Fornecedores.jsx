@@ -9,6 +9,7 @@ import {
   ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import CustomSelect from '../components/CustomSelect';
 import './Fornecedores.css';
 
 export default function Fornecedores() {
@@ -200,59 +201,40 @@ export default function Fornecedores() {
 
         {/* Fornecedores Filters Bar */}
         <div className="fornecedores-filters-bar">
-          <div className="filter-group">
-            <label>Categoria</label>
-            <select 
-              value={fornecedorFilters?.categoria || 'Todos'} 
-              onChange={e => { updateFornecedorFilter('categoria', e.target.value); setCurrentPage(1); }}
-            >
-              {(filterOptions?.fornCategorias || ['Todos']).map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
+          <CustomSelect
+            label="Categoria"
+            value={fornecedorFilters?.categoria || 'Todos'}
+            options={filterOptions?.fornCategorias || ['Todos']}
+            onChange={val => { updateFornecedorFilter('categoria', val); setCurrentPage(1); }}
+          />
 
-          <div className="filter-group">
-            <label>Estado (UF)</label>
-            <select 
-              value={fornecedorFilters?.uf || 'Todos'} 
-              onChange={e => { updateFornecedorFilter('uf', e.target.value); setCurrentPage(1); }}
-            >
-              {(filterOptions?.fornUfs || ['Todos']).map(u => <option key={u} value={u}>{u}</option>)}
-            </select>
-          </div>
+          <CustomSelect
+            label="Estado (UF)"
+            value={fornecedorFilters?.uf || 'Todos'}
+            options={filterOptions?.fornUfs || ['Todos']}
+            onChange={val => { updateFornecedorFilter('uf', val); setCurrentPage(1); }}
+          />
 
-          <div className="filter-group">
-            <label>Cidade</label>
-            <select 
-              value={fornecedorFilters?.cidade || 'Todos'} 
-              onChange={e => { updateFornecedorFilter('cidade', e.target.value); setCurrentPage(1); }}
-            >
-              {(filterOptions?.fornCidades || ['Todos']).map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
+          <CustomSelect
+            label="Cidade"
+            value={fornecedorFilters?.cidade || 'Todos'}
+            options={filterOptions?.fornCidades || ['Todos']}
+            onChange={val => { updateFornecedorFilter('cidade', val); setCurrentPage(1); }}
+          />
 
-          <div className="filter-group">
-            <label>Compra pela Internet</label>
-            <select 
-              value={fornecedorFilters?.compraInternet || 'Todos'} 
-              onChange={e => { updateFornecedorFilter('compraInternet', e.target.value); setCurrentPage(1); }}
-            >
-              <option value="Todos">Todos</option>
-              <option value="SIM">Sim</option>
-              <option value="NÃO">Não</option>
-            </select>
-          </div>
+          <CustomSelect
+            label="Compra pela Internet"
+            value={fornecedorFilters?.compraInternet || 'Todos'}
+            options={['Todos', 'SIM', 'NÃO']}
+            onChange={val => { updateFornecedorFilter('compraInternet', val); setCurrentPage(1); }}
+          />
 
-          <div className="filter-group">
-            <label>Fornecedor Local</label>
-            <select 
-              value={fornecedorFilters?.fornecedorLocal || 'Todos'} 
-              onChange={e => { updateFornecedorFilter('fornecedorLocal', e.target.value); setCurrentPage(1); }}
-            >
-              <option value="Todos">Todos</option>
-              <option value="SIM">Sim</option>
-              <option value="NÃO">Não</option>
-            </select>
-          </div>
+          <CustomSelect
+            label="Fornecedor Local"
+            value={fornecedorFilters?.fornecedorLocal || 'Todos'}
+            options={['Todos', 'SIM', 'NÃO']}
+            onChange={val => { updateFornecedorFilter('fornecedorLocal', val); setCurrentPage(1); }}
+          />
 
           {hasActiveFilters && (
             <button 

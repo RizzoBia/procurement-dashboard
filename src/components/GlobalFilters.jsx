@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, ChevronDown, RotateCcw } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import CustomSelect from './CustomSelect';
 import './GlobalFilters.css';
 
 export default function GlobalFilters() {
@@ -69,7 +70,7 @@ export default function GlobalFilters() {
   return (
     <div className="header-filters-wrapper">
       <div className="header-filters">
-        {/* Modern Period Filter Box as requested in image1.png */}
+        {/* Modern Period Filter Box */}
         <div className="period-filter-box" ref={popoverRef}>
           <button 
             type="button" 
@@ -118,46 +119,44 @@ export default function GlobalFilters() {
         </div>
 
         {/* Ano */}
-        <div className="filter-group">
-          <label>Ano</label>
-          <select value={filters.ano} onChange={e => updateFilter('ano', e.target.value)}>
-            {filterOptions.anos.map(a => <option key={a} value={a}>{a}</option>)}
-          </select>
-        </div>
+        <CustomSelect 
+          label="Ano"
+          value={filters.ano}
+          options={filterOptions.anos}
+          onChange={val => updateFilter('ano', val)}
+        />
 
         {/* Mês */}
-        <div className="filter-group">
-          <label>Mês</label>
-          <select value={filters.mes} onChange={e => updateFilter('mes', e.target.value)}>
-            {filterOptions.meses.map(m => <option key={m} value={m}>{m}</option>)}
-          </select>
-        </div>
+        <CustomSelect 
+          label="Mês"
+          value={filters.mes}
+          options={filterOptions.meses}
+          onChange={val => updateFilter('mes', val)}
+        />
 
         {/* Comprador */}
-        <div className="filter-group">
-          <label>Comprador</label>
-          <select value={filters.comprador} onChange={e => updateFilter('comprador', e.target.value)}>
-            {filterOptions.compradores.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
+        <CustomSelect 
+          label="Comprador"
+          value={filters.comprador}
+          options={filterOptions.compradores}
+          onChange={val => updateFilter('comprador', val)}
+        />
 
         {/* Área Requisitante */}
-        <div className="filter-group">
-          <label>Área Requisitante</label>
-          <select value={filters.area} onChange={e => updateFilter('area', e.target.value)}>
-            {filterOptions.areas.map(a => <option key={a} value={a}>{a}</option>)}
-          </select>
-        </div>
+        <CustomSelect 
+          label="Área Requisitante"
+          value={filters.area}
+          options={filterOptions.areas}
+          onChange={val => updateFilter('area', val)}
+        />
 
         {/* Status SLA */}
-        <div className="filter-group">
-          <label>Status SLA</label>
-          <select value={filters.statusSla} onChange={e => updateFilter('statusSla', e.target.value)}>
-            <option value="Todos">Todos</option>
-            <option value="No Prazo">No Prazo</option>
-            <option value="Atrasada">Atrasada</option>
-          </select>
-        </div>
+        <CustomSelect 
+          label="Status SLA"
+          value={filters.statusSla}
+          options={['Todos', 'No Prazo', 'Atrasada']}
+          onChange={val => updateFilter('statusSla', val)}
+        />
 
         {/* Limpar Filtros Button */}
         {hasActiveFilters && (

@@ -76,18 +76,19 @@ export default function Financeiro() {
     // Calcular Pareto
     const fornecedoresArray = Object.entries(fornecedoresMap)
       .map(([name, spend]) => ({ name, spend }))
-      .sort((a,b) => b.spend - a.spend); // Ordem descrescente
+      .sort((a,b) => b.spend - a.spend); // Ordem decrescente
       
     let acumulado = 0;
     const paretoData = fornecedoresArray.map(f => {
       acumulado += f.spend;
+      const cleanName = f.name.length > 14 ? f.name.slice(0, 13) + '...' : f.name;
       return {
-        name: f.name.substring(0, 15) + (f.name.length > 15 ? '...' : ''),
+        name: cleanName,
         fullName: f.name,
         spend: f.spend,
         acumuladoPerc: spendTotal > 0 ? (acumulado / spendTotal) * 100 : 0
       };
-    }).slice(0, 15); // Top 15 para não poluir
+    }).slice(0, 10); // Top 10 para ficar limpo e legível
 
     return { spendTotal, capexTotal, opexTotal, savingTotal, spendMensal, paretoData };
   }, [filteredData]);
@@ -147,7 +148,7 @@ export default function Financeiro() {
           <div className="middle-charts-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
             <div className="glass-panel chart-card">
               <h3 className="chart-title">EVOLUÇÃO DO SPEND MENSAL</h3>
-              <div className="chart-container" style={{ height: 350 }}>
+              <div className="chart-container" style={{ height: 360 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={spendMensal} margin={{ top: 20, right: 30, bottom: 0, left: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
@@ -167,12 +168,23 @@ export default function Financeiro() {
             </div>
             
             <div className="glass-panel chart-card">
-              <h3 className="chart-title">CURVA DE PARETO - FORNECEDORES (TOP 15)</h3>
-              <div className="chart-container" style={{ height: 350 }}>
+              <h3 className="chart-title">CURVA DE PARETO - FORNECEDORES (TOP 10)</h3>
+              <div className="chart-container" style={{ height: 360 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={paretoData} margin={{ top: 20, right: 20, bottom: 40, left: 20 }}>
+                  <ComposedChart data={paretoData} margin={{ top: 20, right: 20, bottom: 55, left: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" stroke="var(--text-secondary)" tickLine={false} axisLine={false} fontSize={10} />
+                    <XAxis 
+                      dataKey="name" 
+                      angle={-25} 
+                      textAnchor="end" 
+                      stroke="var(--text-secondary)" 
+                      tickLine={false} 
+                      axisLine={false} 
+                      fontSize={11}
+                      interval={0}
+                      height={55}
+                      dy={8}
+                    />
                     <YAxis yAxisId="left" stroke="var(--text-secondary)" tickFormatter={(val) => `R$ ${(val/1000).toFixed(0)}k`} tickLine={false} axisLine={false} />
                     <YAxis yAxisId="right" orientation="right" stroke="var(--text-secondary)" tickFormatter={(val) => `${val.toFixed(0)}%`} tickLine={false} axisLine={false} domain={[0, 100]} />
                     <RechartsTooltip 
@@ -183,8 +195,8 @@ export default function Financeiro() {
                       formatter={(val, name) => [name === 'acumuladoPerc' ? `${val.toFixed(1)}%` : formatCurrency(val), name === 'acumuladoPerc' ? '% Acumulado' : 'Spend']}
                       labelFormatter={(label, entries) => entries.length > 0 ? entries[0].payload.fullName : label}
                     />
-                    <Bar yAxisId="left" dataKey="spend" name="Spend" fill="#0ea5e9" radius={[2, 2, 0, 0]} />
-                    <Line yAxisId="right" type="monotone" dataKey="acumuladoPerc" name="% Acumulado" stroke="#f59e0b" strokeWidth={2} dot={{r: 2, fill: '#f59e0b'}} />
+                    <Bar yAxisId="left" dataKey="spend" name="Spend" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
+                    <Line yAxisId="right" type="monotone" dataKey="acumuladoPerc" name="% Acumulado" stroke="#f59e0b" strokeWidth={2} dot={{r: 3, fill: '#f59e0b'}} />
                   </ComposedChart>
                 </ResponsiveContainer>
               </div>

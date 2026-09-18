@@ -68,19 +68,45 @@ export default function Fornecedores() {
     const percNet = total > 0 ? (compraNet / total) * 100 : 0;
     const percNaoNet = total > 0 ? (naoCompraNet / total) * 100 : 0;
 
+    const cleanCategoryName = (cat) => {
+      if (!cat) return 'Outros';
+      const map = {
+        'Materiais e Suprimentos Industriais': 'Materiais e Suprim.',
+        'Marketing, Comunicação e Eventos': 'Marketing & Eventos',
+        'Fornecedores de Alimentação': 'Alimentação',
+        'Consultoria Técnica / Jurídica': 'Consultoria',
+        'Softwares e Licenciamento': 'Softwares & TI',
+        'Tecnologia da Informação': 'Tecnologia da Info',
+        'Serviços de Eventos': 'Eventos',
+        'Locação de Espaços': 'Locação Espaços',
+        'Transportes e Logística': 'Transporte & Log.',
+        'Construção Civil e Reformas': 'Construção Civil'
+      };
+      return map[cat] || (cat.length > 20 ? cat.slice(0, 18) + '...' : cat);
+    };
+
     const catData = Object.entries(catMap)
-      .map(([name, count]) => ({ name: name.length > 18 ? name.slice(0, 18) + '...' : name, fullName: name, count }))
+      .map(([name, count]) => ({ 
+        name: cleanCategoryName(name), 
+        fullName: name, 
+        count 
+      }))
       .sort((a,b) => b.count - a.count)
-      .slice(0, 10);
+      .slice(0, 7);
 
     const ufData = Object.entries(ufMap)
       .map(([name, count]) => ({ name, count, perc: total > 0 ? (count / total) * 100 : 0 }))
-      .sort((a,b) => b.count - a.count);
+      .sort((a,b) => b.count - a.count)
+      .slice(0, 5);
 
     const cidadeData = Object.entries(cidadeMap)
-      .map(([name, count]) => ({ name: name.length > 16 ? name.slice(0, 16) + '...' : name, fullName: name, count }))
+      .map(([name, count]) => ({ 
+        name: name.length > 15 ? name.slice(0, 14) + '...' : name, 
+        fullName: name, 
+        count 
+      }))
       .sort((a,b) => b.count - a.count)
-      .slice(0, 8);
+      .slice(0, 7);
 
     const donutLocal = [
       { name: 'Local', value: locais, perc: percLocal, color: '#22c55e' },
@@ -325,19 +351,19 @@ export default function Fornecedores() {
       <div className="forn-charts-grid">
         {/* Block 1: Fornecedores por Categoria */}
         <div className="glass-panel forn-chart-card">
-          <h3 className="chart-title">Fornecedores por Categoria</h3>
-          <div className="chart-container" style={{ height: 260 }}>
+          <h3 className="chart-title">Fornecedores por Categoria (Top 7)</h3>
+          <div className="chart-container" style={{ height: 280, marginTop: '8px' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={catData} layout="vertical" margin={{ top: 0, right: 30, bottom: 0, left: 20 }}>
+              <BarChart data={catData} layout="vertical" margin={{ top: 5, right: 20, bottom: 0, left: 10 }}>
                 <XAxis type="number" stroke="var(--text-secondary)" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis dataKey="name" type="category" stroke="var(--text-secondary)" fontSize={11} tickLine={false} axisLine={false} width={110} />
+                <YAxis dataKey="name" type="category" stroke="var(--text-secondary)" fontSize={11} tickLine={false} axisLine={false} width={130} />
                 <RechartsTooltip 
                   cursor={{fill: 'rgba(255, 255, 255, 0.05)'}}
                   contentStyle={{ backgroundColor: 'var(--panel-bg)', borderColor: 'var(--border-color)', borderRadius: '8px' }}
                   labelStyle={{ color: 'var(--text-primary)', fontWeight: 'bold' }}
                   formatter={(val, name, item) => [`${val} fornecedores`, item?.payload?.fullName || name]}
                 />
-                <Bar dataKey="count" fill="#22c55e" barSize={12} radius={[0, 4, 4, 0]} />
+                <Bar dataKey="count" fill="#22c55e" barSize={14} radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -346,7 +372,7 @@ export default function Fornecedores() {
         {/* Block 2: Fornecedores por Estado (UF) */}
         <div className="glass-panel forn-chart-card">
           <h3 className="chart-title">Fornecedores por Estado (UF)</h3>
-          <div className="uf-distribution-container">
+          <div className="uf-distribution-container" style={{ height: 280, marginTop: '8px', overflowY: 'auto' }}>
             {ufData.map((u, i) => (
               <div className="uf-dist-item" key={u.name}>
                 <div className="uf-info">
@@ -363,19 +389,19 @@ export default function Fornecedores() {
 
         {/* Block 3: Fornecedores por Cidade */}
         <div className="glass-panel forn-chart-card">
-          <h3 className="chart-title">Fornecedores por Cidade</h3>
-          <div className="chart-container" style={{ height: 260 }}>
+          <h3 className="chart-title">Fornecedores por Cidade (Top 7)</h3>
+          <div className="chart-container" style={{ height: 280, marginTop: '8px' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={cidadeData} layout="vertical" margin={{ top: 0, right: 30, bottom: 0, left: 20 }}>
+              <BarChart data={cidadeData} layout="vertical" margin={{ top: 5, right: 20, bottom: 0, left: 10 }}>
                 <XAxis type="number" stroke="var(--text-secondary)" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis dataKey="name" type="category" stroke="var(--text-secondary)" fontSize={11} tickLine={false} axisLine={false} width={110} />
+                <YAxis dataKey="name" type="category" stroke="var(--text-secondary)" fontSize={11} tickLine={false} axisLine={false} width={105} />
                 <RechartsTooltip 
                   cursor={{fill: 'rgba(255, 255, 255, 0.05)'}}
                   contentStyle={{ backgroundColor: 'var(--panel-bg)', borderColor: 'var(--border-color)', borderRadius: '8px' }}
                   labelStyle={{ color: 'var(--text-primary)', fontWeight: 'bold' }}
                   formatter={(val, name, item) => [`${val} fornecedores`, item?.payload?.fullName || name]}
                 />
-                <Bar dataKey="count" fill="#22c55e" barSize={12} radius={[0, 4, 4, 0]} />
+                <Bar dataKey="count" fill="#22c55e" barSize={14} radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -386,13 +412,15 @@ export default function Fornecedores() {
           <div className="donut-sub-block">
             <h4 className="donut-sub-title">Fornecedor Local</h4>
             <div className="donut-sub-chart">
-              <ResponsiveContainer width={100} height={100}>
-                <PieChart>
-                  <Pie data={donutLocal} innerRadius={28} outerRadius={42} paddingAngle={3} dataKey="value" stroke="none">
-                    {donutLocal.map((entry, index) => <Cell key={index} fill={entry.color} />)}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
+              <div style={{ width: 85, height: 85 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={donutLocal} innerRadius={24} outerRadius={38} paddingAngle={3} dataKey="value" stroke="none">
+                      {donutLocal.map((entry, index) => <Cell key={index} fill={entry.color} />)}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
               <div className="donut-sub-legend">
                 <div className="sub-legend-item">
                   <span className="dot green"></span> Local <strong>{locais} ({(percLocal || 0).toFixed(1)}%)</strong>
@@ -404,16 +432,18 @@ export default function Fornecedores() {
             </div>
           </div>
 
-          <div className="donut-sub-block" style={{marginTop: 12}}>
+          <div className="donut-sub-block">
             <h4 className="donut-sub-title">Compra pela Internet</h4>
             <div className="donut-sub-chart">
-              <ResponsiveContainer width={100} height={100}>
-                <PieChart>
-                  <Pie data={donutNet} innerRadius={28} outerRadius={42} paddingAngle={3} dataKey="value" stroke="none">
-                    {donutNet.map((entry, index) => <Cell key={index} fill={entry.color} />)}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
+              <div style={{ width: 85, height: 85 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={donutNet} innerRadius={24} outerRadius={38} paddingAngle={3} dataKey="value" stroke="none">
+                      {donutNet.map((entry, index) => <Cell key={index} fill={entry.color} />)}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
               <div className="donut-sub-legend">
                 <div className="sub-legend-item">
                   <span className="dot green"></span> Sim <strong>{compraNet} ({(percNet || 0).toFixed(1)}%)</strong>

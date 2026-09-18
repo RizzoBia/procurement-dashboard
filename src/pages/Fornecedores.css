@@ -154,34 +154,39 @@
 .forn-donuts-card {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-evenly;
+  gap: 12px;
 }
 
 .donut-sub-block {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .donut-sub-title {
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0 0 4px 0;
+  margin: 0 0 6px 0;
 }
 
 .donut-sub-chart {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   width: 100%;
 }
 
 .donut-sub-legend {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 0.75rem;
+  gap: 6px;
+  font-size: 0.78rem;
   color: var(--text-secondary);
 }
 
@@ -189,12 +194,14 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
 .sub-legend-item .dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .sub-legend-item .dot.green { background-color: #22c55e; }

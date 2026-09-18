@@ -16,8 +16,7 @@ import {
   Menu,
   Database,
   LogOut,
-  X,
-  Printer
+  X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Layout.css';
@@ -104,9 +103,6 @@ export default function Layout({ theme, toggleTheme }) {
             </button>
           </div>
           <div className="header-actions">
-            <button className="icon-btn" onClick={() => window.print()} title="Imprimir / Salvar em PDF">
-              <Printer size={20} />
-            </button>
             <button className="icon-btn" onClick={toggleTheme} title="Alternar Tema">
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>

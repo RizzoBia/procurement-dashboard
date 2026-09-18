@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   LineChart, Line, ComposedChart
 } from 'recharts';
-import { DollarSign, PiggyBank, Percent, ShoppingCart, Clock, Target, AlertTriangle, TrendingUp, TrendingDown, Download, Printer } from 'lucide-react';
+import { DollarSign, PiggyBank, Percent, ShoppingCart, Clock, Target, AlertTriangle, TrendingUp, TrendingDown, Download } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import GlobalFilters from '../components/GlobalFilters';
 import ProcurementAlerts from '../components/ProcurementAlerts';
@@ -254,29 +254,7 @@ export default function ExecutiveDashboard() {
     <div className="dashboard-container">
       <header className="dashboard-header-flex">
         <div className="header-titles">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <h1 className="page-title">VISÃO GERAL PROCUREMENT</h1>
-            <button 
-              onClick={() => window.print()}
-              className="no-print"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '6px 12px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px',
-                color: 'var(--text-secondary)',
-                fontSize: '12px',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-              title="Imprimir tela ou salvar em PDF"
-            >
-              <Printer size={14} /> PDF / Imprimir
-            </button>
-          </div>
+          <h1 className="page-title">VISÃO GERAL PROCUREMENT</h1>
           <p className="page-subtitle">Visão executiva de Compras</p>
         </div>
         <GlobalFilters />

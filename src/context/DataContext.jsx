@@ -167,14 +167,31 @@ export function DataProvider({ children }) {
       if (f.cidade) fornCidades.add(f.cidade);
     });
 
+    // Helper para ordenar alfabeticamente mantendo 'Todos' sempre como primeiro
+    const sortWithTodosFirst = (set) => {
+      const items = Array.from(set).filter(x => x && x !== 'Todos').sort((a, b) => a.localeCompare(b, 'pt-BR'));
+      return ['Todos', ...items];
+    };
+
+    const sortAnosWithTodosFirst = (set) => {
+      const items = Array.from(set).filter(x => x && x !== 'Todos').sort((a, b) => b.localeCompare(a));
+      return ['Todos', ...items];
+    };
+
+    const monthOrder = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    const sortedMeses = ['Todos', ...monthOrder.filter(m => meses.has(m))];
+
     return {
-      anos: Array.from(anos).sort(),
-      meses: Array.from(meses),
-      compradores: Array.from(compradores).sort(),
-      areas: Array.from(areas).sort(),
-      fornCategorias: Array.from(fornCategorias).sort(),
-      fornUfs: Array.from(fornUfs).sort(),
-      fornCidades: Array.from(fornCidades).sort()
+      anos: sortAnosWithTodosFirst(anos),
+      meses: sortedMeses,
+      compradores: sortWithTodosFirst(compradores),
+      areas: sortWithTodosFirst(areas),
+      fornCategorias: sortWithTodosFirst(fornCategorias),
+      fornUfs: sortWithTodosFirst(fornUfs),
+      fornCidades: sortWithTodosFirst(fornCidades)
     };
   }, [data.pcs, data.fornecedores]);
 

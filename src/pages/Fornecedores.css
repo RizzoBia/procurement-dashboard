@@ -14,45 +14,62 @@
 .fornecedores-filters-bar .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .fornecedores-filters-bar .filter-group label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .fornecedores-filters-bar .filter-group select {
-  padding: 6px 12px;
+  padding: 7px 14px;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 12px;
   background-color: var(--panel-bg);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 500;
   color: var(--text-primary);
   min-width: 130px;
   outline: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.fornecedores-filters-bar .filter-group select:hover {
+  border-color: #22c55e;
+  box-shadow: 0 4px 10px rgba(34, 197, 94, 0.12);
+}
+
+.fornecedores-filters-bar .filter-group select:focus {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
 }
 
 .btn-clear-forn-filters {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-  background-color: transparent;
+  padding: 7px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: rgba(239, 68, 68, 0.05);
   color: #ef4444;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
-  height: 33px;
-  transition: all 0.2s;
+  height: 35px;
+  transition: all 0.2s ease;
 }
 
 .btn-clear-forn-filters:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(239, 68, 68, 0.15);
   border-color: #ef4444;
+  transform: translateY(-1px);
 }
 
 .last-update-box {

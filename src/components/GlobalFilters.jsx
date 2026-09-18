@@ -121,8 +121,7 @@ export default function GlobalFilters() {
         <div className="filter-group">
           <label>Ano</label>
           <select value={filters.ano} onChange={e => updateFilter('ano', e.target.value)}>
-            <option value="Todos">Todos</option>
-            {filterOptions.anos.filter(a => a !== 'Todos').map(a => <option key={a} value={a}>{a}</option>)}
+            {filterOptions.anos.map(a => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
 

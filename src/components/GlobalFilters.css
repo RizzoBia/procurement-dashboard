@@ -14,28 +14,29 @@
   gap: 10px;
   background-color: var(--panel-bg, #ffffff);
   border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 8px;
-  padding: 6px 12px;
+  border-radius: 12px;
+  padding: 7px 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 .period-trigger-btn:hover {
-  border-color: #0f766e;
-  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.15);
+  border-color: #22c55e;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+  transform: translateY(-1px);
 }
 
 .period-trigger-btn.active {
-  border-color: #0f766e;
-  background-color: rgba(15, 118, 110, 0.05);
+  border-color: #22c55e;
+  background-color: rgba(34, 197, 94, 0.08);
 }
 
 .period-icon-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #0f766e;
+  color: #22c55e;
 }
 
 .period-text-wrap {
@@ -46,10 +47,12 @@
 }
 
 .period-label {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   color: var(--text-primary, #0f172a);
   line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .period-value {
@@ -69,18 +72,19 @@
 
 .period-popover {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 8px);
   left: 0;
   z-index: 100;
-  min-width: 260px;
+  min-width: 290px;
   background-color: var(--panel-bg, #ffffff);
   border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 8px;
-  padding: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .period-popover-title {
@@ -88,78 +92,101 @@
   font-weight: 700;
   color: var(--text-primary);
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .period-inputs-row {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
 .period-input-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   flex: 1;
 }
 
 .period-input-group label {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   color: var(--text-secondary);
   font-weight: 600;
 }
 
-.period-input-group input {
-  padding: 4px 8px;
-  border-radius: 4px;
+.period-input-group input[type="date"] {
+  padding: 6px 10px;
+  border-radius: 10px;
   border: 1px solid var(--border-color);
-  background-color: var(--panel-bg);
+  background-color: rgba(255, 255, 255, 0.03);
   color: var(--text-primary);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
+  font-family: inherit;
   outline: none;
+  transition: all 0.2s ease;
+}
+
+.period-input-group input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(0.8);
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  padding: 2px;
+}
+
+.period-input-group input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+.period-input-group input[type="date"]:focus {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
 }
 
 .period-presets {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-  padding-top: 6px;
+  padding-top: 8px;
   border-top: 1px solid var(--border-color);
 }
 
 .period-presets button {
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 5px 10px;
+  border-radius: 8px;
   border: 1px solid var(--border-color);
-  background: none;
-  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 0.72rem;
+  font-weight: 500;
   color: var(--text-primary);
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition: all 0.2s ease;
 }
 
 .period-presets button:hover {
-  background-color: rgba(15, 118, 110, 0.1);
-  border-color: #0f766e;
+  background-color: rgba(34, 197, 94, 0.12);
+  border-color: #22c55e;
+  color: #22c55e;
 }
 
 .btn-clear-filters {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-  background-color: transparent;
+  padding: 7px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: rgba(239, 68, 68, 0.05);
   color: #ef4444;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  height: 33px;
+  transition: all 0.2s ease;
+  height: 35px;
   margin-bottom: 1px;
 }
 
 .btn-clear-filters:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(239, 68, 68, 0.15);
   border-color: #ef4444;
+  transform: translateY(-1px);
 }

@@ -31,6 +31,80 @@ export default function AdminUpload() {
       let totalInserted = 0;
       let totalFornecedores = 0;
 
+      // 1. Processar Cadastro Fornecedores
+      const fornSheetName = workbook.SheetNames.find(s => {
+        const lower = s.toLowerCase();
+        return lower.includes('fornecedor') || lower.includes('cadastro');
+      });
+
+      if (fornSheetName) {
+        const fornSheet = workbook.Sheets[fornSheetName];
+        const fornData = XLSX.utils.sheet_to_json(fornSheet);
+
+        const fornPayload = fornData.map((row, idx) => {
+          const getVal = (...keys) => {
+            for (const k of keys) {
+              for (const rowKey of Object.keys(row)) {
+                const cleanRowKey = rowKey.replace(/[\r\n\s_]+/g, '').toLowerCase();
+                const cleanTarget = k.replace(/[\r\n\s_]+/g, '').toLowerCase();
+                if (cleanRowKey.includes(cleanTarget)) {
+                  const val = row[rowKey];
+                  return val !== undefined && val !== null ? String(val).trim() : '';
+                }
+              }
+            }
+            return '';
+          };
+
+          const cod = getVal('cod', 'codigo');
+          const cat = getVal('categoria');
+          const razao = getVal('razaosocial', 'razao');
+          const fantasia = getVal('nomefantasia', 'fantasia') || razao;
+          const cnpj = getVal('cnpj');
+          const endereco = getVal('endereco');
+          const cidade = getVal('cidade');
+          const uf = getVal('uf').toUpperCase();
+          const cep = getVal('cep');
+          const pais = getVal('pais');
+          const contato = getVal('contato');
+          const tel = getVal('telefone', 'tel');
+          const email = getVal('email', 'e-mail');
+          
+          const compNetRaw = getVal('comprainternet', 'internet').toUpperCase();
+          const compNet = (compNetRaw.includes('SIM') || compNetRaw === 'S') ? 'SIM' : 'NÃO';
+          
+          const fornLocRaw = getVal('fornecedorlocal', 'local').toUpperCase();
+          const fornLoc = (fornLocRaw.includes('SIM') || fornLocRaw === 'S') ? 'SIM' : 'NÃO';
+
+          if (!razao && !fantasia && !cnpj) return null;
+
+          return {
+            codigo: cod || String(300000 + idx + 1),
+            categoria: cat || 'Outros',
+            razao_social: razao || fantasia,
+            nome_fantasia: fantasia || razao,
+            cnpj: cnpj || '',
+            endereco: endereco || '',
+            cidade: cidade || 'Não informada',
+            uf: uf || 'ND',
+            cep: cep || '',
+            pais: pais || 'BRASIL',
+            contato: contato || '',
+            telefone: tel || '',
+            email: email || '',
+            compra_internet: compNet,
+            fornecedor_local: fornLoc,
+            status: 'Ativo'
+          };
+        }).filter(Boolean);
+
+        if (fornPayload.length > 0) {
+          localStorage.setItem('procurement_custom_fornecedores', JSON.stringify(fornPayload));
+          totalFornecedores = fornPayload.length;
+        }
+      }
+
+      // 2. Processar Controle PCs
       if (workbook.SheetNames.includes('Controle PCs')) {
         const pcsSheet = workbook.Sheets['Controle PCs'];
         const pcsData = XLSX.utils.sheet_to_json(pcsSheet);
@@ -101,9 +175,13 @@ export default function AdminUpload() {
         await refreshData();
       }
 
+      const msgParts = [];
+      if (totalInserted > 0) msgParts.push(`${totalInserted} registros de Controle PCs`);
+      if (totalFornecedores > 0) msgParts.push(`${totalFornecedores} fornecedores cadastrados`);
+
       setStatus({ 
         type: 'success', 
-        message: `Upload concluído com sucesso! ${totalInserted} registros de Controle PCs sincronizados.` 
+        message: `Upload concluído com sucesso! ${msgParts.join(' e ')} sincronizados.` 
       });
     } catch (err) {
       console.error(err);

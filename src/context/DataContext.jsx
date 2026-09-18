@@ -9,9 +9,22 @@ export function useData() {
 }
 
 export function DataProvider({ children }) {
+  const getFornecedores = () => {
+    try {
+      const stored = localStorage.getItem('procurement_custom_fornecedores');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn("Could not read local stored fornecedores:", e);
+    }
+    return initialData.fornecedores || [];
+  };
+
   const [data, setData] = useState({
     pcs: initialData.pcs || [],
-    fornecedores: initialData.fornecedores || [],
+    fornecedores: getFornecedores(),
     monthly_rcs: initialData.monthly_rcs || []
   });
   const [loading, setLoading] = useState(false);
@@ -51,6 +64,8 @@ export function DataProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
+      const currentFornecedores = getFornecedores();
+
       // Try fetching from Supabase
       const { data: pcsData, error: pcsError } = await supabase
         .from('controle_pcs')
@@ -58,10 +73,9 @@ export function DataProvider({ children }) {
 
       if (pcsError) {
         console.warn("Supabase load failed, using local bundled data:", pcsError.message);
-        // Fallback to bundled dataset
         setData({
           pcs: initialData.pcs || [],
-          fornecedores: initialData.fornecedores || [],
+          fornecedores: currentFornecedores,
           monthly_rcs: initialData.monthly_rcs || []
         });
       } else if (pcsData && pcsData.length > 0) {
@@ -83,7 +97,7 @@ export function DataProvider({ children }) {
         setData(prev => ({
           ...prev,
           pcs: formattedData,
-          fornecedores: initialData.fornecedores || [],
+          fornecedores: currentFornecedores,
           monthly_rcs: initialData.monthly_rcs || []
         }));
       }
@@ -91,7 +105,7 @@ export function DataProvider({ children }) {
       console.warn("Error loading data from Supabase, fallback to bundled data:", err);
       setData({
         pcs: initialData.pcs || [],
-        fornecedores: initialData.fornecedores || [],
+        fornecedores: getFornecedores(),
         monthly_rcs: initialData.monthly_rcs || []
       });
     } finally {

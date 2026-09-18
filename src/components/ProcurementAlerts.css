@@ -1,0 +1,120 @@
+.procurement-alerts-card {
+  margin-bottom: 20px;
+  padding: 14px 18px !important;
+  border-radius: 16px;
+  border-left: 4px solid #f59e0b;
+  background: rgba(245, 158, 11, 0.03);
+  transition: all 0.2s ease;
+}
+
+.procurement-alerts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.alerts-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.alerts-bell-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.alerts-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-right: 8px;
+}
+
+.alerts-badge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.alerts-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.procurement-alerts-list {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+}
+
+.alert-item.alert-warning {
+  border-color: rgba(245, 158, 11, 0.25);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.alert-item.alert-warning .alert-item-icon {
+  color: #f59e0b;
+}
+
+.alert-item.alert-danger {
+  border-color: rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.alert-item.alert-danger .alert-item-icon {
+  color: #ef4444;
+}
+
+.alert-item-icon {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.alert-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.alert-item-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.alert-item-message {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}

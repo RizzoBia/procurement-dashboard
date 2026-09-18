@@ -3,6 +3,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsToolti
 import { DollarSign, PieChart as PieIcon, Briefcase, TrendingDown } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import GlobalFilters from '../components/GlobalFilters';
+import ChartHeader from '../components/ChartHeader';
 import './ExecutiveDashboard.css';
 
 const formatCurrency = (val) => {
@@ -146,8 +147,8 @@ export default function Financeiro() {
           </div>
 
           <div className="middle-charts-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-            <div className="glass-panel chart-card">
-              <h3 className="chart-title">EVOLUÇÃO DO SPEND MENSAL</h3>
+            <div id="chart-spend-mensal-fin" className="glass-panel chart-card">
+              <ChartHeader title="EVOLUÇÃO DO SPEND MENSAL" chartId="chart-spend-mensal-fin" downloadName="evolucao_spend_mensal" />
               <div className="chart-container" style={{ height: 360 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={spendMensal} margin={{ top: 20, right: 30, bottom: 0, left: 20 }}>
@@ -167,8 +168,8 @@ export default function Financeiro() {
               </div>
             </div>
             
-            <div className="glass-panel chart-card">
-              <h3 className="chart-title">CURVA DE PARETO - FORNECEDORES (TOP 10)</h3>
+            <div id="chart-pareto-fin" className="glass-panel chart-card">
+              <ChartHeader title="CURVA DE PARETO - FORNECEDORES (TOP 10)" chartId="chart-pareto-fin" downloadName="curva_pareto_fornecedores" />
               <div className="chart-container" style={{ height: 360 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={paretoData} margin={{ top: 20, right: 20, bottom: 55, left: 10 }}>

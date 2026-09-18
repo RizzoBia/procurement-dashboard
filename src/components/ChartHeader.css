@@ -1,0 +1,51 @@
+.chart-header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.chart-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.chart-download-btn:hover {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: #22c55e;
+  color: #22c55e;
+  transform: translateY(-1px);
+}
+
+.chart-download-btn .download-icon {
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+
+.chart-download-btn:hover .download-icon {
+  color: #22c55e;
+}
+
+.chart-download-btn .download-icon.success {
+  color: #22c55e;
+}
+
+.chart-download-btn .download-icon.loading {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

@@ -6,10 +6,11 @@ import {
 import { 
   Users, CheckCircle2, Package, MapPin, Globe, ShoppingCart, 
   Map, Building2, Search, RotateCcw, Calendar, Check, X,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, FileSpreadsheet
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import CustomSelect from '../components/CustomSelect';
+import { exportToExcel } from '../utils/exportUtils';
 import './Fornecedores.css';
 
 export default function Fornecedores() {
@@ -190,6 +191,23 @@ export default function Fornecedores() {
     donutNet = []
   } = metrics || {};
 
+  const handleExportExcel = () => {
+    const exportData = fornList.map(f => ({
+      'Código Fornecedor': f.id_fornecedor || '-',
+      'Razão Social': f.razao_social || '-',
+      'Nome Fantasia': f.nome_fantasia || '-',
+      'CNPJ': f.cnpj || '-',
+      'Categoria': f.categoria || '-',
+      'Cidade': f.cidade || '-',
+      'UF': f.uf || '-',
+      'Endereço': f.endereco || '-',
+      'CEP': f.cep || '-',
+      'Fornecedor Local': f.fornecedor_local || 'NÃO',
+      'Compra Internet': f.compra_internet || 'NÃO'
+    }));
+    exportToExcel(exportData, `fornecedores_filtrados_${new Date().toISOString().slice(0,10)}`, 'Fornecedores');
+  };
+
   return (
     <div className="dashboard-container fornecedores-page">
       {/* Top Header */}
@@ -332,8 +350,10 @@ export default function Fornecedores() {
       {/* Middle Visuals Row: 4 Blocks */}
       <div className="forn-charts-grid">
         {/* Block 1: Fornecedores por Categoria */}
-        <div className="glass-panel forn-chart-card">
-          <h3 className="chart-title">Fornecedores por Categoria (Top 7)</h3>
+        <div id="chart-forn-categoria" className="glass-panel forn-chart-card">
+          <div className="chart-header-flex">
+            <h3 className="chart-title" style={{ margin: 0 }}>Fornecedores por Categoria (Top 7)</h3>
+          </div>
           <div className="chart-container" style={{ height: 280, marginTop: '8px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={catData} layout="vertical" margin={{ top: 5, right: 20, bottom: 0, left: 10 }}>
@@ -352,8 +372,10 @@ export default function Fornecedores() {
         </div>
 
         {/* Block 2: Fornecedores por Estado (UF) */}
-        <div className="glass-panel forn-chart-card">
-          <h3 className="chart-title">Fornecedores por Estado (UF)</h3>
+        <div id="chart-forn-uf" className="glass-panel forn-chart-card">
+          <div className="chart-header-flex">
+            <h3 className="chart-title" style={{ margin: 0 }}>Fornecedores por Estado (UF)</h3>
+          </div>
           <div className="uf-distribution-container" style={{ height: 280, marginTop: '8px', overflowY: 'auto' }}>
             {ufData.map((u, i) => (
               <div className="uf-dist-item" key={u.name}>
@@ -370,8 +392,10 @@ export default function Fornecedores() {
         </div>
 
         {/* Block 3: Fornecedores por Cidade */}
-        <div className="glass-panel forn-chart-card">
-          <h3 className="chart-title">Fornecedores por Cidade (Top 7)</h3>
+        <div id="chart-forn-cidade" className="glass-panel forn-chart-card">
+          <div className="chart-header-flex">
+            <h3 className="chart-title" style={{ margin: 0 }}>Fornecedores por Cidade (Top 7)</h3>
+          </div>
           <div className="chart-container" style={{ height: 280, marginTop: '8px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={cidadeData} layout="vertical" margin={{ top: 5, right: 20, bottom: 0, left: 10 }}>
@@ -442,24 +466,40 @@ export default function Fornecedores() {
       {/* Table: Lista de Fornecedores */}
       <div className="glass-panel forn-table-card">
         <div className="forn-table-header">
-          <h3 className="chart-title" style={{margin: 0}}>Lista de Fornecedores</h3>
-          <div className="forn-search-box">
-            <Search size={16} className="forn-search-icon" />
-            <input 
-              type="text" 
-              placeholder="Pesquisar fornecedor..." 
-              value={fornecedorFilters?.busca || ''}
-              onChange={e => { updateFornecedorFilter('busca', e.target.value); setCurrentPage(1); }}
-            />
-            {fornecedorFilters?.busca && (
-              <button 
-                type="button" 
-                className="search-clear-btn" 
-                onClick={() => updateFornecedorFilter('busca', '')}
-              >
-                <X size={14} />
-              </button>
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <h3 className="chart-title" style={{margin: 0}}>Lista de Fornecedores</h3>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>({fornList.length} encontrados)</span>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button
+              type="button"
+              className="export-excel-btn"
+              onClick={handleExportExcel}
+              title="Exportar dados filtrados para planilha Excel (.xlsx)"
+            >
+              <FileSpreadsheet size={16} />
+              <span>Exportar Excel</span>
+            </button>
+
+            <div className="forn-search-box">
+              <Search size={16} className="forn-search-icon" />
+              <input 
+                type="text" 
+                placeholder="Pesquisar fornecedor..." 
+                value={fornecedorFilters?.busca || ''}
+                onChange={e => { updateFornecedorFilter('busca', e.target.value); setCurrentPage(1); }}
+              />
+              {fornecedorFilters?.busca && (
+                <button 
+                  type="button" 
+                  className="search-clear-btn" 
+                  onClick={() => updateFornecedorFilter('busca', '')}
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

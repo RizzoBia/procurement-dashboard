@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
 import { TrendingUp, DollarSign, Target, Award } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import GlobalFilters from '../components/GlobalFilters';
-
+import ChartHeader from '../components/ChartHeader';
 
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#a855f7', '#ec4899', '#06b6d4', '#8b5cf6'];
 
@@ -116,8 +116,8 @@ export default function Saving() {
           </div>
 
           <div className="middle-charts-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-            <div className="glass-panel chart-card">
-              <h3 className="chart-title">EVOLUÇÃO DO SAVING MENSAL</h3>
+            <div id="chart-saving-mensal" className="glass-panel chart-card">
+              <ChartHeader title="EVOLUÇÃO DO SAVING MENSAL" chartId="chart-saving-mensal" downloadName="evolucao_saving_mensal" />
               <div className="chart-container" style={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={savingMensal} margin={{ top: 20, right: 30, bottom: 0, left: 0 }}>
@@ -137,8 +137,8 @@ export default function Saving() {
               </div>
             </div>
             
-            <div className="glass-panel chart-card">
-              <h3 className="chart-title">TOP SAVING POR COMPRADOR</h3>
+            <div id="chart-saving-comprador-pie" className="glass-panel chart-card">
+              <ChartHeader title="TOP SAVING POR COMPRADOR" chartId="chart-saving-comprador-pie" downloadName="top_saving_comprador" />
               <div className="chart-container" style={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>

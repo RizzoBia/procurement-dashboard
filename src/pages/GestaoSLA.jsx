@@ -3,9 +3,11 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   LineChart, Line
 } from 'recharts';
-import { Clock, Target, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Clock, Target, AlertTriangle, CheckCircle2, Download } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import GlobalFilters from '../components/GlobalFilters';
+import ChartHeader from '../components/ChartHeader';
+import { exportToExcel } from '../utils/exportUtils';
 import './ExecutiveDashboard.css';
 
 export default function GestaoSLA() {
@@ -102,6 +104,19 @@ export default function GestaoSLA() {
     };
   }, [filteredData]);
 
+  const handleExportAtrasos = () => {
+    if (!slaMetrics?.topAtrasos) return;
+    const exportData = slaMetrics.topAtrasos.map(p => ({
+      'RC': p.rc,
+      'Pedido': p.pedido,
+      'Comprador': p.comprador,
+      'Área': p.area,
+      'Fornecedor': p.fornecedor,
+      'SLA (Dias)': p.sla
+    }));
+    exportToExcel(exportData, 'pedidos_em_atraso_sla', 'Pedidos em Atraso');
+  };
+
   if (loading) return <div className="dashboard-container" style={{padding: 40}}><h2>Carregando dados...</h2></div>;
 
   const { avgLeadTime, slaPerc, pedidosPorArea, slaPorArea, slaMensal, topAtrasos, total, atrasadasCount } = slaMetrics || {};
@@ -156,9 +171,8 @@ export default function GestaoSLA() {
           </div>
 
           <div className="middle-charts-grid" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-            {/* Replaced Status dos Processos donut with Pedidos por Área as requested in feedback */}
-            <div className="glass-panel chart-card">
-              <h3 className="chart-title">QUANTIDADE DE PEDIDOS POR ÁREA</h3>
+            <div id="chart-pedidos-area-sla" className="glass-panel chart-card">
+              <ChartHeader title="QUANTIDADE DE PEDIDOS POR ÁREA" chartId="chart-pedidos-area-sla" downloadName="pedidos_por_area" />
               <div className="chart-container" style={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={pedidosPorArea} layout="vertical" margin={{ top: 10, right: 25, bottom: 0, left: 20 }}>
@@ -177,8 +191,8 @@ export default function GestaoSLA() {
               </div>
             </div>
 
-            <div className="glass-panel chart-card">
-              <h3 className="chart-title">EVOLUÇÃO DO LEAD TIME MÉDIO (Dias)</h3>
+            <div id="chart-leadtime-mensal" className="glass-panel chart-card">
+              <ChartHeader title="EVOLUÇÃO DO LEAD TIME MÉDIO (Dias)" chartId="chart-leadtime-mensal" downloadName="evolucao_lead_time" />
               <div className="chart-container" style={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={slaMensal} margin={{ top: 20, right: 30, bottom: 0, left: 0 }}>
@@ -198,8 +212,8 @@ export default function GestaoSLA() {
               </div>
             </div>
 
-            <div className="glass-panel chart-card">
-              <h3 className="chart-title">% DE SLA POR ÁREA REQUISITANTE</h3>
+            <div id="chart-sla-area" className="glass-panel chart-card">
+              <ChartHeader title="% DE SLA POR ÁREA REQUISITANTE" chartId="chart-sla-area" downloadName="sla_por_area" />
               <div className="chart-container" style={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={slaPorArea} layout="vertical" margin={{ top: 10, right: 30, bottom: 0, left: 20 }}>
@@ -221,7 +235,28 @@ export default function GestaoSLA() {
 
           <div className="bottom-charts-grid" style={{ gridTemplateColumns: '1fr' }}>
             <div className="glass-panel chart-card">
-              <h3 className="chart-title">PEDIDOS EM ATRASO (Maiores Lead Times)</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h3 className="chart-title" style={{ margin: 0 }}>PEDIDOS EM ATRASO (Maiores Lead Times)</h3>
+                <button 
+                  onClick={handleExportAtrasos}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 12px',
+                    background: 'rgba(15, 118, 110, 0.15)',
+                    border: '1px solid rgba(15, 118, 110, 0.3)',
+                    borderRadius: '8px',
+                    color: '#2dd4bf',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <Download size={14} /> Exportar Excel
+                </button>
+              </div>
               <div className="table-container">
                 <table className="data-table">
                   <thead>

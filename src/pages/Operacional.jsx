@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, FileSpreadsheet } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import GlobalFilters from '../components/GlobalFilters';
+import { exportToExcel } from '../utils/exportUtils';
 import './ExecutiveDashboard.css';
 
 const formatCurrency = (val) => {
@@ -23,6 +24,27 @@ export default function Operacional() {
     );
   });
 
+  const handleExportExcel = () => {
+    const exportData = displayData.map(row => ({
+      'RC': row.rc || '-',
+      'Pedido': row.pedido_compras || '-',
+      'Comprador': row.comprador || '-',
+      'Área Requisitante': row.area_requisitante || '-',
+      'Fornecedor': row.fornecedor || '-',
+      'Tipo': row.tipo || '-',
+      'Material / Serviço': row.material_servico || '-',
+      'Categoria': row.capex_opex || 'OPEX',
+      'Proposta Inicial (R$)': row.proposta_inicial || 0,
+      'Proposta Negociada (R$)': row.proposta_negociada || 0,
+      'Saving Total (R$)': row.saving_cost_total || 0,
+      'SLA Atendimento (Dias)': row.sla_atendimento || 0,
+      'Status SLA': row.atrasada_no_prazo || 'NO PRAZO',
+      'Data Aprovação RC': row.data_aprovacao_rc || '-',
+      'Data Pedido': row.data_pedido || '-'
+    }));
+    exportToExcel(exportData, `gestao_operacional_${new Date().toISOString().slice(0, 10)}`, 'Operacional');
+  };
+
   if (loading) return <div className="dashboard-container" style={{padding: 40}}><h2>Carregando dados...</h2></div>;
 
   return (
@@ -30,34 +52,47 @@ export default function Operacional() {
       <header className="dashboard-header-flex">
         <div className="header-titles">
           <h1 className="page-title">GESTÃO OPERACIONAL</h1>
-          <p className="page-subtitle">Tabela Detalhada</p>
+          <p className="page-subtitle">Tabela Detalhada de Processos</p>
         </div>
         <GlobalFilters />
       </header>
 
-      <div className="glass-panel" style={{marginBottom: '20px'}}>
-        <div style={{display:'flex', gap:'16px', alignItems:'center'}}>
-          <div style={{ position: 'relative', width: '100%', maxWidth: '400px' }}>
-            <Search size={18} color="var(--text-secondary)" style={{ position: 'absolute', left: 12, top: 10 }} />
+      <div className="glass-panel" style={{marginBottom: '20px', padding: '16px'}}>
+        <div style={{display:'flex', justifyContent: 'space-between', gap:'16px', alignItems:'center', flexWrap: 'wrap'}}>
+          <div style={{ position: 'relative', width: '100%', maxWidth: '420px' }}>
+            <Search size={18} color="var(--text-secondary)" style={{ position: 'absolute', left: 12, top: 11 }} />
             <input 
               type="text" 
               placeholder="Buscar por RC, Pedido, Comprador ou Fornecedor..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
-                padding: '10px 10px 10px 38px', 
-                borderRadius: '6px', 
+                padding: '9px 12px 9px 38px', 
+                borderRadius: '12px', 
                 border: '1px solid var(--border-color)', 
-                background: 'var(--bg-color)', 
+                background: 'var(--panel-bg)', 
                 color: 'var(--text-primary)',
                 width: '100%',
-                outline: 'none'
+                outline: 'none',
+                fontSize: '0.85rem'
               }} 
             />
           </div>
-          <span style={{color: 'var(--text-secondary)', fontSize: '0.875rem'}}>
-            Mostrando {displayData.length} registros
-          </span>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <span style={{color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600}}>
+              {displayData.length} registros encontrados
+            </span>
+            <button
+              type="button"
+              className="export-excel-btn"
+              onClick={handleExportExcel}
+              title="Exportar dados filtrados para planilha Excel (.xlsx)"
+            >
+              <FileSpreadsheet size={16} />
+              <span>Exportar Excel</span>
+            </button>
+          </div>
         </div>
       </div>
 

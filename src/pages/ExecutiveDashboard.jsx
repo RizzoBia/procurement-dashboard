@@ -3,9 +3,11 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   LineChart, Line, ComposedChart
 } from 'recharts';
-import { DollarSign, PiggyBank, Percent, ShoppingCart, Clock, Target, AlertTriangle } from 'lucide-react';
+import { DollarSign, PiggyBank, Percent, ShoppingCart, Clock, Target, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import GlobalFilters from '../components/GlobalFilters';
+import ProcurementAlerts from '../components/ProcurementAlerts';
+import ChartHeader from '../components/ChartHeader';
 import './ExecutiveDashboard.css';
 
 // Helper formatter
@@ -88,45 +90,135 @@ export default function ExecutiveDashboard() {
       if (row.area_requisitante) {
         areaMap[row.area_requisitante] = (areaMap[row.area_requisitante] || 0) + propNeg;
       }
-      if (row.fornecedor) {
-        fornecedorMap[row.fornecedor] = (fornecedorMap[row.fornecedor] || 0) + propNeg;
-      }
+      if (row.status_sla === 'No Prazo') slaNoPrazoCount++;
+      if (row.status_sla === 'Em Atraso') pedidosEmAtrasoCount++;
 
-      // Deduplicação rigorosa dos Top Processos por chave única
-      const uniqueKey = `${row.pedido_compras || ''}_${row.rc || ''}_${row.fornecedor || ''}_${propNeg}`;
-      if (!processosMap.has(uniqueKey) || processosMap.get(uniqueKey).savingRs < saving) {
-        processosMap.set(uniqueKey, {
-          rc: row.rc,
-          pedido: row.pedido_compras || '-',
-          fornecedor: row.fornecedor,
-          area: row.area_requisitante,
-          categoria: row.material_servico || row.tipo || '-',
-          pInicial: propIni,
-          pNegociada: propNeg,
-          savingRs: saving,
-          savingPerc: propIni > 0 ? (saving / propIni) * 100 : 0
+      // Agrupamento Mensal Spend e Saving
+      const mesKey = row.ano_mes || 'Outros';
+      if (!mensalMap[mesKey]) {
+        mensalMap[mesKey] = { mesKey, spend: 0, saving: 0, propIni: 0, time: row.data_rc ? new Date(row.data_rc).getTime() : 0 };
+      }
+      mensalMap[mesKey].spend += propNeg;
+      mensalMap[mesKey].saving += saving;
+      mensalMap[mesKey].propIni += propIni;
+
+      // Agrupamento RCs Mensal (Recebidas vs Concluidas)
+      if (!rcsMensalMap[mesKey]) {
+        rcsMensalMap[mesKey] = { 
+          name: mesKey, 
+          recebidas: 0, 
+          concluidas: 0, 
+          time: row.data_rc ? new Date(row.data_rc).getTime() : 0 
+        };
+      }
+      if (row.numero_rc) rcsMensalMap[mesKey].recebidas++;
+      if (row.numero_pedido || row.status_sla === 'No Prazo') rcsMensalMap[mesKey].concluidas++;
+
+      // Comprador
+      const comp = row.comprador || 'Não informado';
+      compradorMap[comp] = (compradorMap[comp] || 0) + saving;
+
+      // Area
+      const ar = row.area_requisitante || 'Não informada';
+      areaMap[ar] = (areaMap[ar] || 0) + propNeg;
+
+      // Fornecedor
+      const forn = row.fornecedor || 'Não informado';
+      fornecedorMap[forn] = (fornecedorMap[forn] || 0) + propNeg;
+
+      // Processos (para tabela Top 10)
+      const rcKey = row.numero_rc || row.numero_pedido || `Item-${Math.random()}`;
+      if (!processosMap.has(rcKey)) {
+        processosMap.set(rcKey, {
+          rc: row.numero_rc || '-',
+          pedido: row.numero_pedido || '-',
+          fornecedor: row.fornecedor || '-',
+          area: row.area_requisitante || '-',
+          categoria: row.categoria || '-',
+          pInicial: 0,
+          pNegociada: 0,
+          savingRs: 0,
+          savingPerc: 0
         });
       }
+      const proc = processosMap.get(rcKey);
+      proc.pInicial += propIni;
+      proc.pNegociada += propNeg;
+      proc.savingRs += saving;
+      proc.savingPerc = proc.pInicial > 0 ? ((proc.pInicial - proc.pNegociada) / proc.pInicial) * 100 : 0;
     });
 
     const savingPercTotal = propostaInicialTotal > 0 ? (savingTotal / propostaInicialTotal) * 100 : 0;
-    const avgLeadTime = filteredData.length > 0 ? (slaAtendimentoSum / filteredData.length) : 0;
-    const slaPerc = filteredData.length > 0 ? (slaNoPrazoCount / filteredData.length) * 100 : 0;
+    const slaMedio = filteredData.length > 0 ? (slaAtendimentoSum / filteredData.length) : 0;
+    const slaAtingimento = filteredData.length > 0 ? (slaNoPrazoCount / filteredData.length) * 100 : 0;
 
-    const totalPedidosDisplay = uniquePedidos.size > 0 ? uniquePedidos.size.toString() : filteredData.length.toString();
+    // Calculo MoM Trend (Comparativo mês a mês para KPIs)
+    const sortedMonths = Object.values(mensalMap).sort((a,b) => a.time - b.time);
+    let spendTrend = null;
+    let savingTrend = null;
+    if (sortedMonths.length >= 2) {
+      const lastM = sortedMonths[sortedMonths.length - 1];
+      const prevM = sortedMonths[sortedMonths.length - 2];
+      if (prevM.spend > 0) {
+        const diff = ((lastM.spend - prevM.spend) / prevM.spend) * 100;
+        spendTrend = { val: `${diff > 0 ? '+' : ''}${diff.toFixed(1)}%`, isPositive: diff <= 0 };
+      }
+      if (prevM.saving > 0) {
+        const diff = ((lastM.saving - prevM.saving) / prevM.saving) * 100;
+        savingTrend = { val: `${diff > 0 ? '+' : ''}${diff.toFixed(1)}%`, isPositive: diff >= 0 };
+      }
+    }
 
     const kpis = [
-      { title: 'SPEND TOTAL', value: formatCurrency(spendTotal), icon: <DollarSign size={20} />, iconColor: '#22c55e' },
-      { title: 'SAVING / CUSTO EVITADO', value: formatCurrency(savingTotal), icon: <PiggyBank size={20} />, iconColor: '#22c55e' },
-      { title: 'SAVING % / CUSTO EVITADO %', value: `${savingPercTotal.toFixed(2).replace('.', ',')}%`, icon: <Percent size={20} />, iconColor: '#22c55e' },
-      { title: 'TOTAL DE PEDIDOS', value: totalPedidosDisplay, icon: <ShoppingCart size={20} />, iconColor: '#22c55e' },
-      { title: 'LEAD TIME MÉDIO', value: `${avgLeadTime.toFixed(1).replace('.', ',')} dias`, icon: <Clock size={20} />, iconColor: '#3b82f6' },
-      { title: 'SLA (%)', value: `${slaPerc.toFixed(1).replace('.', ',')}%`, icon: <Target size={20} />, iconColor: '#22c55e' },
-      { title: 'PEDIDOS EM ATRASO', value: pedidosEmAtrasoCount.toString(), icon: <AlertTriangle size={20} />, iconColor: '#ef4444' }
+      {
+        title: 'SPEND TOTAL',
+        value: formatCurrency(spendTotal),
+        icon: <DollarSign size={22} />,
+        iconColor: '#38bdf8',
+        trend: spendTrend
+      },
+      {
+        title: 'SAVING TOTAL',
+        value: formatCurrency(savingTotal),
+        icon: <PiggyBank size={22} />,
+        iconColor: '#4ade80',
+        trend: savingTrend
+      },
+      {
+        title: 'SAVING %',
+        value: `${savingPercTotal.toFixed(1).replace('.', ',')}%`,
+        icon: <Percent size={22} />,
+        iconColor: '#a78bfa'
+      },
+      {
+        title: 'TOTAL PEDIDOS',
+        value: uniquePedidos.size.toLocaleString('pt-BR'),
+        icon: <ShoppingCart size={22} />,
+        iconColor: '#f43f5e'
+      },
+      {
+        title: 'SLA MÉDIO',
+        value: `${slaMedio.toFixed(1).replace('.', ',')} dias`,
+        icon: <Clock size={22} />,
+        iconColor: '#fbbf24'
+      },
+      {
+        title: '% NO PRAZO (SLA)',
+        value: `${slaAtingimento.toFixed(1).replace('.', ',')}%`,
+        icon: <Target size={22} />,
+        iconColor: '#2dd4bf'
+      },
+      {
+        title: 'PEDIDOS EM ATRASO',
+        value: pedidosEmAtrasoCount.toLocaleString('pt-BR'),
+        icon: <AlertTriangle size={22} />,
+        iconColor: '#f87171'
+      }
     ];
 
-    const evolucao = Object.values(mensalMap).sort((a,b) => a.time - b.time).map(m => ({
-      name: m.name,
+    // Evolução Mensal
+    const evolucao = sortedMonths.map(m => ({
+      name: m.mesKey,
       spend: m.spend / 1000000,
       saving: m.saving / 1000000,
       savingPerc: m.propIni > 0 ? (m.saving / m.propIni) * 100 : 0
@@ -134,9 +226,8 @@ export default function ExecutiveDashboard() {
 
     // Evolução RCs Recebidas x Concluídas
     let evolucaoRcs = Object.values(rcsMensalMap).sort((a,b) => a.time - b.time);
-    if (evolucaoRcs.length === 0) {
-      // Fallback from monthlyRcs dataset
-      evolucaoRcs = (monthlyRcs || []).map(m => ({
+    if (evolucaoRcs.length === 0 && monthlyRcs && monthlyRcs.length > 0) {
+      evolucaoRcs = monthlyRcs.map(m => ({
         name: m.mesKey,
         recebidas: m.recebidas,
         concluidas: m.concluidas
@@ -158,6 +249,22 @@ export default function ExecutiveDashboard() {
 
     return { kpis, evolucao, evolucaoRcs, topCompradores, topAreas, topFornecedores, topProcessos, totalItems: filteredData.length };
   }, [filteredData, monthlyRcs]);
+
+  const handleExportTopProcessos = () => {
+    if (!dashboardData?.topProcessos) return;
+    const exportData = dashboardData.topProcessos.map(p => ({
+      'RC': p.rc,
+      'Pedido': p.pedido,
+      'Fornecedor': p.fornecedor,
+      'Área': p.area,
+      'Categoria': p.categoria,
+      'Proposta Inicial (R$)': p.pInicial,
+      'Proposta Negociada (R$)': p.pNegociada,
+      'Saving (R$)': p.savingRs,
+      'Saving (%)': `${p.savingPerc.toFixed(1)}%`
+    }));
+    exportToExcel(exportData, 'top_processos_saving', 'Top Processos Saving');
+  };
 
   if (loading) {
     return <div className="dashboard-container" style={{padding: 40}}><h2>Carregando dados...</h2></div>;
@@ -182,6 +289,9 @@ export default function ExecutiveDashboard() {
         </div>
       ) : (
         <>
+          {/* Alertas Inteligentes de Risco */}
+          <ProcurementAlerts data={filteredData} />
+
           {/* KPIs Row */}
           <div className="kpi-row">
             {kpis.map((kpi, idx) => (
@@ -194,7 +304,13 @@ export default function ExecutiveDashboard() {
                   <div className="kpi-mini-value">{kpi.value}</div>
                 </div>
                 <div className="kpi-mini-footer">
-                  <span className="vs-mes">Ativos no período</span>
+                  {kpi.trend ? (
+                    <span className={`kpi-trend ${kpi.trend.isPositive ? 'trend-up' : 'trend-down'}`}>
+                      {kpi.trend.val} vs mês ant.
+                    </span>
+                  ) : (
+                    <span className="vs-mes">Ativos no período</span>
+                  )}
                 </div>
               </div>
             ))}
@@ -202,8 +318,8 @@ export default function ExecutiveDashboard() {
 
           {/* Middle Row Charts */}
           <div className="middle-charts-grid">
-            <div className="glass-panel chart-card col-span-2">
-              <h3 className="chart-title">EVOLUÇÃO MENSAL - SPEND x SAVING</h3>
+            <div id="chart-spend-saving" className="glass-panel chart-card col-span-2">
+              <ChartHeader title="EVOLUÇÃO MENSAL - SPEND x SAVING" chartId="chart-spend-saving" downloadName="evolucao_spend_saving" />
               <div className="chart-legend-custom">
                  <span className="legend-item"><span className="legend-color" style={{backgroundColor: '#0f766e'}}></span> Spend (R$)</span>
                  <span className="legend-item"><span className="legend-color" style={{backgroundColor: '#86efac'}}></span> Saving (R$)</span>
@@ -230,8 +346,8 @@ export default function ExecutiveDashboard() {
               </div>
             </div>
 
-            <div className="glass-panel chart-card">
-              <h3 className="chart-title">SAVING POR COMPRADOR</h3>
+            <div id="chart-saving-comprador" className="glass-panel chart-card">
+              <ChartHeader title="SAVING POR COMPRADOR" chartId="chart-saving-comprador" downloadName="saving_por_comprador" />
               <div className="chart-container" style={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={topCompradores} layout="vertical" margin={{ top: 0, right: 30, bottom: 0, left: 30 }}>
@@ -250,9 +366,8 @@ export default function ExecutiveDashboard() {
               </div>
             </div>
 
-            {/* Replaced Status SLA donut with Evolução Mensal | RCs Recebidas x Concluídas as requested in image2.png */}
-            <div className="glass-panel chart-card">
-              <h3 className="chart-title">EVOLUÇÃO MENSAL | RCs Recebidas x Concluídas</h3>
+            <div id="chart-rcs-evolucao" className="glass-panel chart-card">
+              <ChartHeader title="EVOLUÇÃO MENSAL | RCs Recebidas x Concluídas" chartId="chart-rcs-evolucao" downloadName="rcs_recebidas_concluidas" />
               <div className="chart-legend-custom">
                  <span className="legend-item"><span className="legend-color" style={{backgroundColor: '#0f766e'}}></span> RCs Recebidas</span>
                  <span className="legend-item"><span className="legend-color" style={{backgroundColor: '#86efac'}}></span> RCs Concluídas</span>
@@ -280,8 +395,8 @@ export default function ExecutiveDashboard() {
 
           {/* Bottom Row Charts */}
           <div className="bottom-charts-grid">
-            <div className="glass-panel chart-card">
-              <h3 className="chart-title">SPEND POR ÁREA REQUISITANTE</h3>
+            <div id="chart-spend-area" className="glass-panel chart-card">
+              <ChartHeader title="SPEND POR ÁREA REQUISITANTE" chartId="chart-spend-area" downloadName="spend_por_area" />
               <div className="chart-container" style={{ height: 320 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={topAreas} layout="vertical" margin={{ top: 0, right: 30, bottom: 0, left: 30 }}>
@@ -300,8 +415,8 @@ export default function ExecutiveDashboard() {
               </div>
             </div>
 
-            <div className="glass-panel chart-card">
-              <h3 className="chart-title">TOP 10 FORNECEDORES POR SPEND</h3>
+            <div id="chart-top-fornecedores" className="glass-panel chart-card">
+              <ChartHeader title="TOP 10 FORNECEDORES POR SPEND" chartId="chart-top-fornecedores" downloadName="top_fornecedores_spend" />
               <div className="chart-container" style={{ height: 320 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={topFornecedores} layout="vertical" margin={{ top: 0, right: 30, bottom: 0, left: 40 }}>
@@ -322,7 +437,28 @@ export default function ExecutiveDashboard() {
             </div>
 
             <div className="glass-panel chart-card col-span-full">
-              <h3 className="chart-title">TOP 10 PROCESSOS COM MAIOR SAVING</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h3 className="chart-title" style={{ margin: 0 }}>TOP 10 PROCESSOS COM MAIOR SAVING</h3>
+                <button 
+                  onClick={handleExportTopProcessos}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 12px',
+                    background: 'rgba(15, 118, 110, 0.15)',
+                    border: '1px solid rgba(15, 118, 110, 0.3)',
+                    borderRadius: '8px',
+                    color: '#2dd4bf',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <Download size={14} /> Exportar Excel
+                </button>
+              </div>
               <div className="table-container">
                 <table className="data-table">
                   <thead>

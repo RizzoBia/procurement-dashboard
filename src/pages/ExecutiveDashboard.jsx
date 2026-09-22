@@ -163,7 +163,7 @@ export default function ExecutiveDashboard() {
         trend: savingTrend
       },
       {
-        title: 'SAVING %',
+        title: 'SAVING/CUSTO EVITADO %',
         value: `${savingPercTotal.toFixed(1).replace('.', ',')}%`,
         icon: <Percent size={22} />,
         iconColor: '#a78bfa'
